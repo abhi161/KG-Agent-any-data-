@@ -1,0 +1,122 @@
+{
+  "entity_types": [
+    {
+      "name": "Patient",
+      "description": "A person receiving medical care",
+      "properties": [
+        "patient_id",
+        "first_name",
+        "last_name",
+        "full_name",
+        "gender",
+        "age",
+        "blood_type",
+        "registration_date"
+      ]
+    },
+    {
+      "name": "Medication",
+      "description": "A pharmaceutical drug or treatment",
+      "properties": [
+        "medication_id",
+        "medication_name",
+        "category",
+        "manufacturer",
+        "approval_year"
+      ]
+    },
+    {
+      "name": "Doctor",
+      "description": "A medical professional",
+      "properties": [
+        "doctor_id",
+        "full_name",
+        "specialty",
+        "hospital",
+        "years_of_experience"
+      ]
+    },
+    {
+      "name": "Condition",
+      "description": "A medical condition or disease",
+      "properties": [
+        "name",
+        "description",
+        "icd_code",
+        "category"
+      ]
+    },
+    {
+      "name": "Prescription",
+      "description": "A prescription for medication",
+      "properties": [
+        "prescription_id",
+        "dosage",
+        "frequency",
+        "prescription_date"
+      ]
+    }
+  ],
+  "relation_types": [
+    {
+      "name": "HAS_CONDITION",
+      "description": "Patient has a medical condition",
+      "source_types": [
+        "Patient"
+      ],
+      "target_types": [
+        "Condition"
+      ]
+    },
+    {
+      "name": "PRESCRIBED",
+      "description": "Doctor prescribed a medication to a patient",
+      "source_types": [
+        "Doctor"
+      ],
+      "target_types": [
+        "Prescription"
+      ]
+    },
+    {
+      "name": "PRESCRIBED_FOR",
+      "description": "Prescription is for a patient",
+      "source_types": [
+        "Prescription"
+      ],
+      "target_types": [
+        "Patient"
+      ]
+    },
+    {
+      "name": "CONTAINS",
+      "description": "Prescription contains a medication",
+      "source_types": [
+        "Prescription"
+      ],
+      "target_types": [
+        "Medication"
+      ]
+    },
+    {
+      "name": "TREATS",
+      "description": "Medication treats a condition",
+      "source_types": [
+        "Medication"
+      ],
+      "target_types": [
+        "Condition"
+      ]
+    },
+    {
+      "name": "INTERACTS_WITH",
+      "description": "Medication interacts with another medication",
+      "source_types": [
+        "Medication"
+      ],
+      "target_types": [
+        "Medication"
+      ]
+    }
+  ]
+}

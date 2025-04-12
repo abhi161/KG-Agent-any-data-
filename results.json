@@ -1,0 +1,18 @@
+{
+  "csv_files_processed": 4,
+  "pdf_files_processed": 2,
+  "entities_created": 13,
+  "relationships_created": 1304,
+  "start_time": "2025-04-10T09:09:11.469825",
+  "end_time": "2025-04-10T09:10:25.090076",
+  "entity_resolution": {
+    "exact_matches": 1230,
+    "fuzzy_matches": 0,
+    "llm_resolved": 4,
+    "new_entities": 13
+  },
+  "pending_schema_changes": {
+    "entity_types": 6,
+    "relation_types": 0
+  }
+}

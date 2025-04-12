@@ -1,0 +1,127 @@
+
+MEDICATION INTERACTION GUIDE
+Hospital Pharmacy Department
+Last Updated: June 15, 2023
+
+This document provides information about potential interactions between commonly prescribed medications. 
+It is intended as a reference for healthcare professionals and should not replace clinical judgment.
+
+KNOWN INTERACTIONS:
+
+Pravastatin + Azithromycin
+Severity: Minor
+Effect: May prolong QT interval
+Recommendation: Avoid combination if possible
+
+Clopidogrel + Levothyroxine
+Severity: Moderate
+Effect: May decrease effectiveness
+Recommendation: Monitor closely
+
+Ciprofloxacin + Oxycodone
+Severity: Severe
+Effect: May elevate serum potassium levels
+Recommendation: Avoid combination if possible
+
+Ciprofloxacin + Azithromycin
+Severity: Moderate
+Effect: May enhance hypotensive effects
+Recommendation: Consider alternative therapy
+
+Methylprednisolone + Fluoxetine
+Severity: Moderate
+Effect: May prolong QT interval
+Recommendation: Monitor blood levels regularly
+
+Losartan + Venlafaxine
+Severity: Severe
+Effect: May increase risk of bleeding
+Recommendation: Monitor renal function
+
+Sertraline + Losartan
+Severity: Moderate
+Effect: May enhance hypotensive effects
+Recommendation: Avoid combination if possible
+
+Levothyroxine + Azithromycin
+Severity: Severe
+Effect: May increase risk of myopathy
+Recommendation: Monitor for signs of toxicity
+
+Hydrocodone + Losartan
+Severity: Minor
+Effect: May decrease effectiveness
+Recommendation: Monitor blood levels regularly
+
+Pravastatin + Levothyroxine
+Severity: Moderate
+Effect: May increase risk of myopathy
+Recommendation: Monitor blood pressure
+
+Levothyroxine + Ciprofloxacin
+Severity: Minor
+Effect: May prolong QT interval
+Recommendation: Avoid combination if possible
+
+Ciprofloxacin + Xyzal
+Severity: Minor
+Effect: May cause CNS depression
+Recommendation: Monitor for signs of toxicity
+
+Levothyroxine + Clopidogrel
+Severity: Minor
+Effect: May enhance hypotensive effects
+Recommendation: Monitor blood pressure
+
+Hydrocodone + Oxycodone
+Severity: Severe
+Effect: May elevate serum potassium levels
+Recommendation: Monitor for signs of toxicity
+
+Sertraline + Simvastatin
+Severity: Moderate
+Effect: May cause CNS depression
+Recommendation: Monitor blood levels regularly
+
+Losartan + Pravastatin
+Severity: Severe
+Effect: May increase risk of bleeding
+Recommendation: Monitor closely
+
+Simvastatin + Xyzal
+Severity: Moderate
+Effect: May increase risk of myopathy
+Recommendation: Monitor for signs of toxicity
+
+Sertraline + Levothyroxine
+Severity: Minor
+Effect: May decrease effectiveness
+Recommendation: Monitor closely
+
+Fluoxetine + Levothyroxine
+Severity: Severe
+Effect: May reduce absorption
+Recommendation: Adjust dosage as needed
+
+Xyzal + Venlafaxine
+Severity: Severe
+Effect: May reduce anticoagulant effectiveness
+Recommendation: Monitor closely
+
+SPECIAL POPULATIONS:
+
+Pregnant Women:
+The following medications should be used with caution or avoided during pregnancy:
+- Clopidogrel: Contraindicated
+- Levothyroxine: Limited data available
+- Sertraline: Limited data available
+- Azithromycin: Generally considered safe
+- Losartan: Contraindicated
+
+Elderly Patients:
+The following medications require dose adjustments or special monitoring in elderly patients:
+- Ciprofloxacin: Monitor renal function
+- Azithromycin: Increased risk of falls
+- Sertraline: Start at lower dose
+- Oxycodone: May cause confusion
+- Xyzal: Increased risk of falls

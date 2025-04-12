@@ -1,0 +1,301 @@
+prescription_id,patient_id,patient_name,medication_id,medication_name,dosage,frequency,prescription_date,prescribing_doctor
+RX000001,PT000072,Mia Wilson,MED00042,Lorazepam,250 mg,Once daily,2020-12-17,Dr. Elizabeth Taylor
+RX000002,PT000088,Linda Lewis,MED00049,Vyvanse,20 mg,Weekly,2021-05-01,Dr. Sarah Johnson
+RX000003,PT000076,Jennifer Lewis,MED00046,Diazepam,150 mg,As needed,2022-03-10,Dr. David Rodriguez
+RX000004,PT000043,Sophia Martinez,MED00045,Methylprednisolone,10 mg,Weekly,2021-07-13,Dr. Elizabeth Taylor
+RX000005,PT000077,Linda Thomas,MED00032,Clonazepam,50 mg,Once daily,2022-02-24,Dr. Michael Chen
+RX000006,PT000047,Olivia Wilson,MED00047,Lyrica,500 mg,Three times daily,2020-03-11,Dr. Robert Brown
+RX000007,PT000085,Mary Williams,MED00001,Lisinopril,25 mg,Three times daily,2022-12-08,Dr. Emily Wilson
+RX000008,PT000039,Charles Jones,MED00021,Albuterol,20 mg,Three times daily,2022-03-08,Dr. Elizabeth Taylor
+RX000009,PT000080,Jessica White,MED00031,Clopidogrel,100 mg,Weekly,2020-07-10,Dr. Michael Chen
+RX000010,PT000014,Olivia Thomas,MED00029,Citalopram,50 mg,Twice daily,2022-08-23,Dr. Michael Chen
+RX000011,PT000036,Emma Clark,MED00043,Cyclobenzaprine,200 mg,Every 12 hours,2021-11-27,Dr. Michael Chen
+RX000012,PT000014,Olivia Thomas,MED00037,Alprazolam,100 mg,Twice daily,2021-04-06,Dr. David Rodriguez
+RX000013,PT000044,Patricia Moore,MED00002,Metformin,250 mg,Every 12 hours,2023-03-01,Dr. Michael Chen
+RX000014,PT000028,Jessica White,MED00023,Tramadol,20 mg,Weekly,2020-10-10,Dr. Elizabeth Taylor
+RX000015,PT000018,Barbara Johnson,MED00033,Meloxicam,250 mg,Three times daily,2023-06-26,Dr. Robert Brown
+RX000016,PT000027,Mary Taylor,MED00049,Vyvanse,25 mg,Weekly,2021-12-03,Dr. Michael Chen
+RX000017,PT000022,William Robinson,MED00015,Escitalopram,200 mg,As needed,2022-04-07,Dr. David Rodriguez
+RX000018,PT000073,Mary Jackson,MED00037,Alprazolam,20 mg,Every 12 hours,2021-09-01,Dr. Michael Chen
+RX000019,PT000017,Elizabeth Allen,MED00043,Cyclobenzaprine,500 mg,Three times daily,2021-07-06,Dr. Sarah Johnson
+RX000020,PT000019,Jennifer Young,MED00006,Metoprolol,25 mg,Once daily,2023-10-14,Dr. Michael Chen
+RX000021,PT000045,David Davis,MED00035,Venlafaxine,20 mg,Once daily,2022-11-08,Dr. Sarah Johnson
+RX000022,PT000040,Joseph Clark,MED00003,Atorvastatin,5 mg,Twice daily,2020-11-12,Dr. Elizabeth Taylor
+RX000023,PT000098,Jessica Miller,MED00036,Amoxicillin,10 mg,Weekly,2022-06-03,Dr. Michael Chen
+RX000024,PT000099,Charles Hall,MED00045,Methylprednisolone,20 mg,Twice daily,2023-12-27,Dr. David Rodriguez
+RX000025,PT000009,Noah Garcia,MED00010,Gabapentin,25 mg,Once daily,2022-07-30,Dr. Sarah Johnson
+RX000026,PT000064,Ava King,MED00003,Atorvastatin,20 mg,Every 12 hours,2020-10-20,Dr. Emily Wilson
+RX000027,PT000057,Sophia Taylor,MED00036,Amoxicillin,500 mg,Once daily,2021-05-14,Dr. Michael Chen
+RX000028,PT000046,William Taylor,MED00047,Lyrica,150 mg,Every 12 hours,2023-10-06,Dr. David Rodriguez
+RX000029,PT000029,Richard Lewis,MED00027,Carvedilol,100 mg,As needed,2023-10-10,Dr. Emily Wilson
+RX000030,PT000017,Elizabeth Allen,MED00011,Hydrochlorothiazide,25 mg,Once daily,2020-12-20,Dr. Emily Wilson
+RX000031,PT000024,Sophia White,MED00015,Escitalopram,5 mg,Once daily,2023-12-29,Dr. Robert Brown
+RX000032,PT000026,John Walker,MED00040,Trazodone,150 mg,Once daily,2023-12-03,Dr. Elizabeth Taylor
+RX000033,PT000067,John Brown,MED00035,Venlafaxine,50 mg,Three times daily,2021-09-17,Dr. David Rodriguez
+RX000034,PT000024,Sophia White,MED00007,Omeprazole,50 mg,Once daily,2023-05-24,Dr. Sarah Johnson
+RX000035,PT000041,Richard Clark,MED00016,Acetaminophen,250 mg,Twice daily,2020-06-02,Dr. David Rodriguez
+RX000036,PT000090,Jennifer Harris,MED00043,Cyclobenzaprine,20 mg,Twice daily,2022-12-06,Dr. Emily Wilson
+RX000037,PT000028,Jessica White,MED00035,Venlafaxine,100 mg,Once daily,2021-05-26,Dr. Michael Chen
+RX000038,PT000012,Noah Harris,MED00036,Amoxicillin,20 mg,Three times daily,2020-09-20,Dr. Emily Wilson
+RX000039,PT000017,Elizabeth Allen,MED00040,Trazodone,250 mg,Once daily,2021-11-11,Dr. Robert Brown
+RX000040,PT000064,Ava King,MED00026,Rosuvastatin,150 mg,Once daily,2020-09-02,Dr. David Rodriguez
+RX000041,PT000080,Jessica White,MED00049,Vyvanse,500 mg,Three times daily,2022-10-07,Dr. Robert Brown
+RX000042,PT000034,Thomas Miller,MED00039,Ciprofloxacin,20 mg,Once daily,2020-04-10,Dr. Emily Wilson
+RX000043,PT000070,Michael King,MED00004,Levothyroxine,500 mg,Every 12 hours,2023-11-03,Dr. Sarah Johnson
+RX000044,PT000036,Emma Clark,MED00014,Pantoprazole,5 mg,As needed,2022-10-18,Dr. Emily Wilson
+RX000045,PT000027,Mary Taylor,MED00043,Cyclobenzaprine,150 mg,Every 12 hours,2022-12-08,Dr. Robert Brown
+RX000046,PT000051,Ava Taylor,MED00009,Losartan,250 mg,As needed,2022-02-14,Dr. Elizabeth Taylor
+RX000047,PT000010,John Jackson,MED00045,Methylprednisolone,20 mg,Three times daily,2021-09-24,Dr. Robert Brown
+RX000048,PT000058,James Young,MED00037,Alprazolam,25 mg,Once daily,2021-05-30,Dr. Emily Wilson
+RX000049,PT000099,Charles Hall,MED00003,Atorvastatin,10 mg,Three times daily,2022-07-05,Dr. Robert Brown
+RX000050,PT000008,Sophia Rodriguez,MED00015,Escitalopram,10 mg,As needed,2020-02-08,Dr. David Rodriguez
+RX000051,PT000041,Richard Clark,MED00037,Alprazolam,25 mg,Three times daily,2021-03-07,Dr. Robert Brown
+RX000052,PT000078,Michael King,MED00025,Azithromycin,25 mg,Three times daily,2020-09-04,Dr. Elizabeth Taylor
+RX000053,PT000036,Emma Clark,MED00038,Bupropion,500 mg,Three times daily,2022-07-13,Dr. David Rodriguez
+RX000054,PT000062,Olivia Young,MED00023,Tramadol,5 mg,Once daily,2022-07-19,Dr. Robert Brown
+RX000055,PT000047,Olivia Wilson,MED00029,Citalopram,5 mg,Once daily,2020-09-02,Dr. Sarah Johnson
+RX000056,PT000037,Thomas Robinson,MED00011,Hydrochlorothiazide,200 mg,Twice daily,2022-09-11,Dr. David Rodriguez
+RX000057,PT000073,Mary Jackson,MED00030,Warfarin,100 mg,As needed,2021-03-19,Dr. David Rodriguez
+RX000058,PT000034,Thomas Miller,MED00047,Lyrica,10 mg,Weekly,2021-04-14,Dr. Elizabeth Taylor
+RX000059,PT000048,Sarah Taylor,MED00033,Meloxicam,10 mg,Every 12 hours,2021-07-09,Dr. Michael Chen
+RX000060,PT000084,Liam Anderson,MED00033,Meloxicam,50 mg,As needed,2020-10-27,Dr. Sarah Johnson
+RX000061,PT000074,Robert Lewis,MED00029,Citalopram,25 mg,Twice daily,2021-09-25,Dr. Emily Wilson
+RX000062,PT000071,Barbara Thomas,MED00013,Montelukast,100 mg,Weekly,2022-02-15,Dr. David Rodriguez
+RX000063,PT000054,Thomas Lee,MED00027,Carvedilol,25 mg,As needed,2021-04-23,Dr. Robert Brown
+RX000064,PT000066,Elizabeth Lee,MED00049,Vyvanse,25 mg,Every 12 hours,2023-02-28,Dr. Sarah Johnson
+RX000065,PT000063,Jackson Hernandez,MED00032,Clonazepam,50 mg,As needed,2022-04-23,Dr. David Rodriguez
+RX000066,PT000055,Patricia Williams,MED00005,Amlodipine,20 mg,Weekly,2021-12-07,Dr. Emily Wilson
+RX000067,PT000002,Michael Moore,MED00049,Vyvanse,250 mg,Weekly,2020-02-11,Dr. Robert Brown
+RX000068,PT000007,Liam Jackson,MED00040,Trazodone,10 mg,Weekly,2022-04-14,Dr. Michael Chen
+RX000069,PT000085,Mary Williams,MED00006,Metoprolol,150 mg,Every 12 hours,2020-03-15,Dr. Sarah Johnson
+RX000070,PT000053,William Miller,MED00042,Lorazepam,150 mg,Weekly,2020-12-11,Dr. Emily Wilson
+RX000071,PT000047,Olivia Wilson,MED00015,Escitalopram,100 mg,As needed,2021-11-05,Dr. Emily Wilson
+RX000072,PT000099,Charles Hall,MED00003,Atorvastatin,100 mg,Weekly,2023-07-01,Dr. Michael Chen
+RX000073,PT000074,Robert Lewis,MED00009,Losartan,200 mg,Once daily,2023-04-23,Dr. Emily Wilson
+RX000074,PT000017,Elizabeth Allen,MED00043,Cyclobenzaprine,50 mg,Once daily,2020-03-09,Dr. Robert Brown
+RX000075,PT000093,Barbara Allen,MED00040,Trazodone,20 mg,Twice daily,2023-04-20,Dr. Elizabeth Taylor
+RX000076,PT000041,Richard Clark,MED00029,Citalopram,200 mg,Twice daily,2022-01-18,Dr. Sarah Johnson
+RX000077,PT000099,Charles Hall,MED00005,Amlodipine,5 mg,As needed,2020-01-18,Dr. Sarah Johnson
+RX000078,PT000062,Olivia Young,MED00011,Hydrochlorothiazide,200 mg,Weekly,2020-09-13,Dr. Robert Brown
+RX000079,PT000052,Noah Hall,MED00025,Azithromycin,100 mg,Weekly,2023-01-25,Dr. Robert Brown
+RX000080,PT000045,David Davis,MED00026,Rosuvastatin,100 mg,Twice daily,2022-10-12,Dr. Elizabeth Taylor
+RX000081,PT000055,Patricia Williams,MED00026,Rosuvastatin,25 mg,Every 12 hours,2022-05-18,Dr. Robert Brown
+RX000082,PT000032,Charles Taylor,MED00024,Furosemide,250 mg,Once daily,2020-12-27,Dr. Emily Wilson
+RX000083,PT000061,Karen Anderson,MED00047,Lyrica,50 mg,Twice daily,2021-02-13,Dr. David Rodriguez
+RX000084,PT000045,David Davis,MED00013,Montelukast,25 mg,As needed,2023-10-12,Dr. Michael Chen
+RX000085,PT000057,Sophia Taylor,MED00006,Metoprolol,150 mg,Once daily,2020-01-15,Dr. Robert Brown
+RX000086,PT000059,Aiden Taylor,MED00032,Clonazepam,500 mg,Weekly,2020-03-21,Dr. Elizabeth Taylor
+RX000087,PT000034,Thomas Miller,MED00005,Amlodipine,5 mg,Every 12 hours,2023-11-25,Dr. Sarah Johnson
+RX000088,PT000091,Linda Clark,MED00004,Levothyroxine,25 mg,Twice daily,2021-07-12,Dr. Robert Brown
+RX000089,PT000051,Ava Taylor,MED00002,Metformin,200 mg,Weekly,2020-07-09,Dr. Elizabeth Taylor
+RX000090,PT000028,Jessica White,MED00004,Levothyroxine,200 mg,Once daily,2023-02-18,Dr. Emily Wilson
+RX000091,PT000026,John Walker,MED00001,Lisinopril,150 mg,As needed,2023-08-10,Dr. David Rodriguez
+RX000092,PT000064,Ava King,MED00044,Pravastatin,200 mg,As needed,2021-09-05,Dr. Elizabeth Taylor
+RX000093,PT000074,Robert Lewis,MED00006,Metoprolol,20 mg,Twice daily,2020-01-04,Dr. Sarah Johnson
+RX000094,PT000010,John Jackson,MED00027,Carvedilol,20 mg,Three times daily,2023-01-27,Dr. Sarah Johnson
+RX000095,PT000084,Liam Anderson,MED00023,Tramadol,10 mg,Weekly,2023-11-19,Dr. Elizabeth Taylor
+RX000096,PT000040,Joseph Clark,MED00048,Xyzal,25 mg,Three times daily,2020-02-23,Dr. Emily Wilson
+RX000097,PT000047,Olivia Wilson,MED00001,Lisinopril,50 mg,Three times daily,2022-12-24,Dr. Michael Chen
+RX000098,PT000080,Jessica White,MED00002,Metformin,250 mg,Once daily,2021-09-28,Dr. Robert Brown
+RX000099,PT000082,Noah Martinez,MED00001,Lisinopril,25 mg,Three times daily,2020-08-01,Dr. Elizabeth Taylor
+RX000100,PT000058,James Young,MED00027,Carvedilol,10 mg,As needed,2022-01-21,Dr. Emily Wilson
+RX000101,PT000070,Michael King,MED00010,Gabapentin,500 mg,Twice daily,2021-06-01,Dr. Emily Wilson
+RX000102,PT000075,Mia Martinez,MED00050,Januvia,50 mg,Once daily,2020-09-06,Dr. Sarah Johnson
+RX000103,PT000077,Linda Thomas,MED00040,Trazodone,5 mg,Three times daily,2021-01-06,Dr. Robert Brown
+RX000104,PT000012,Noah Harris,MED00024,Furosemide,25 mg,Three times daily,2022-07-31,Dr. David Rodriguez
+RX000105,PT000066,Elizabeth Lee,MED00013,Montelukast,100 mg,Three times daily,2021-04-09,Dr. Emily Wilson
+RX000106,PT000055,Patricia Williams,MED00003,Atorvastatin,100 mg,Weekly,2023-06-11,Dr. Emily Wilson
+RX000107,PT000046,William Taylor,MED00023,Tramadol,5 mg,As needed,2023-11-05,Dr. Michael Chen
+RX000108,PT000074,Robert Lewis,MED00014,Pantoprazole,50 mg,Weekly,2021-04-30,Dr. Robert Brown
+RX000109,PT000028,Jessica White,MED00024,Furosemide,500 mg,Three times daily,2023-04-24,Dr. Michael Chen
+RX000110,PT000046,William Taylor,MED00015,Escitalopram,150 mg,Twice daily,2023-01-01,Dr. Robert Brown
+RX000111,PT000073,Mary Jackson,MED00003,Atorvastatin,50 mg,Weekly,2022-03-26,Dr. Elizabeth Taylor
+RX000112,PT000092,Sophia Martin,MED00029,Citalopram,25 mg,Three times daily,2023-01-14,Dr. Emily Wilson
+RX000113,PT000078,Michael King,MED00038,Bupropion,10 mg,Once daily,2021-06-19,Dr. Emily Wilson
+RX000114,PT000088,Linda Lewis,MED00046,Diazepam,500 mg,As needed,2022-12-27,Dr. Elizabeth Taylor
+RX000115,PT000037,Thomas Robinson,MED00009,Losartan,500 mg,Every 12 hours,2020-04-01,Dr. David Rodriguez
+RX000116,PT000041,Richard Clark,MED00050,Januvia,25 mg,Three times daily,2020-11-14,Dr. Robert Brown
+RX000117,PT000094,Karen Allen,MED00019,Fluoxetine,50 mg,Weekly,2020-05-14,Dr. Sarah Johnson
+RX000118,PT000028,Jessica White,MED00028,Duloxetine,200 mg,Every 12 hours,2020-10-14,Dr. Elizabeth Taylor
+RX000119,PT000038,Sophia Brown,MED00039,Ciprofloxacin,20 mg,Twice daily,2020-03-10,Dr. Emily Wilson
+RX000120,PT000043,Sophia Martinez,MED00043,Cyclobenzaprine,25 mg,Three times daily,2023-03-22,Dr. Michael Chen
+RX000121,PT000071,Barbara Thomas,MED00023,Tramadol,10 mg,Every 12 hours,2022-08-30,Dr. David Rodriguez
+RX000122,PT000034,Thomas Miller,MED00028,Duloxetine,10 mg,Weekly,2021-11-11,Dr. Michael Chen
+RX000123,PT000091,Linda Clark,MED00007,Omeprazole,500 mg,Once daily,2023-05-26,Dr. Emily Wilson
+RX000124,PT000002,Michael Moore,MED00009,Losartan,200 mg,As needed,2020-09-06,Dr. Elizabeth Taylor
+RX000125,PT000022,William Robinson,MED00042,Lorazepam,150 mg,As needed,2022-08-21,Dr. Elizabeth Taylor
+RX000126,PT000053,William Miller,MED00010,Gabapentin,50 mg,Once daily,2021-02-03,Dr. David Rodriguez
+RX000127,PT000057,Sophia Taylor,MED00031,Clopidogrel,25 mg,Every 12 hours,2021-07-25,Dr. Michael Chen
+RX000128,PT000037,Thomas Robinson,MED00012,Sertraline,200 mg,Weekly,2023-10-23,Dr. Robert Brown
+RX000129,PT000032,Charles Taylor,MED00033,Meloxicam,500 mg,Once daily,2021-09-16,Dr. Sarah Johnson
+RX000130,PT000028,Jessica White,MED00021,Albuterol,25 mg,Twice daily,2021-06-23,Dr. Michael Chen
+RX000131,PT000031,Patricia Johnson,MED00008,Simvastatin,50 mg,As needed,2023-11-07,Dr. Sarah Johnson
+RX000132,PT000100,Jessica Jones,MED00042,Lorazepam,500 mg,Once daily,2023-02-10,Dr. Robert Brown
+RX000133,PT000045,David Davis,MED00012,Sertraline,200 mg,Three times daily,2020-06-01,Dr. Robert Brown
+RX000134,PT000024,Sophia White,MED00043,Cyclobenzaprine,150 mg,Three times daily,2023-08-22,Dr. Michael Chen
+RX000135,PT000068,Aiden Martin,MED00050,Januvia,10 mg,Every 12 hours,2023-05-12,Dr. Emily Wilson
+RX000136,PT000068,Aiden Martin,MED00043,Cyclobenzaprine,500 mg,Once daily,2020-05-03,Dr. Sarah Johnson
+RX000137,PT000032,Charles Taylor,MED00005,Amlodipine,5 mg,Twice daily,2022-10-20,Dr. Michael Chen
+RX000138,PT000010,John Jackson,MED00049,Vyvanse,150 mg,Twice daily,2020-08-24,Dr. Michael Chen
+RX000139,PT000098,Jessica Miller,MED00047,Lyrica,200 mg,Twice daily,2022-10-22,Dr. Elizabeth Taylor
+RX000140,PT000091,Linda Clark,MED00039,Ciprofloxacin,200 mg,Twice daily,2022-12-21,Dr. David Rodriguez
+RX000141,PT000008,Sophia Rodriguez,MED00004,Levothyroxine,10 mg,Twice daily,2023-04-29,Dr. David Rodriguez
+RX000142,PT000017,Elizabeth Allen,MED00036,Amoxicillin,50 mg,Twice daily,2020-05-30,Dr. Michael Chen
+RX000143,PT000079,Sarah Martin,MED00041,Oxycodone,10 mg,Every 12 hours,2023-10-27,Dr. Robert Brown
+RX000144,PT000054,Thomas Lee,MED00014,Pantoprazole,10 mg,Once daily,2021-04-05,Dr. Sarah Johnson
+RX000145,PT000094,Karen Allen,MED00042,Lorazepam,20 mg,Three times daily,2021-05-14,Dr. David Rodriguez
+RX000146,PT000004,Elizabeth Davis,MED00047,Lyrica,100 mg,Weekly,2021-04-12,Dr. Michael Chen
+RX000147,PT000028,Jessica White,MED00022,Prednisone,10 mg,Every 12 hours,2022-02-10,Dr. David Rodriguez
+RX000148,PT000019,Jennifer Young,MED00038,Bupropion,50 mg,Weekly,2020-10-12,Dr. Sarah Johnson
+RX000149,PT000017,Elizabeth Allen,MED00006,Metoprolol,250 mg,Three times daily,2023-09-05,Dr. Michael Chen
+RX000150,PT000070,Michael King,MED00049,Vyvanse,10 mg,As needed,2022-05-29,Dr. Michael Chen
+RX000151,PT000047,Olivia Wilson,MED00039,Ciprofloxacin,250 mg,Twice daily,2020-06-27,Dr. Sarah Johnson
+RX000152,PT000060,William Lee,MED00020,Fluticasone,5 mg,Once daily,2022-04-17,Dr. David Rodriguez
+RX000153,PT000033,Linda Young,MED00049,Vyvanse,5 mg,Weekly,2020-08-21,Dr. Elizabeth Taylor
+RX000154,PT000027,Mary Taylor,MED00011,Hydrochlorothiazide,5 mg,Three times daily,2022-05-04,Dr. Michael Chen
+RX000155,PT000075,Mia Martinez,MED00006,Metoprolol,10 mg,Three times daily,2023-06-18,Dr. David Rodriguez
+RX000156,PT000007,Liam Jackson,MED00048,Xyzal,20 mg,Every 12 hours,2021-03-15,Dr. David Rodriguez
+RX000157,PT000002,Michael Moore,MED00039,Ciprofloxacin,50 mg,As needed,2022-01-02,Dr. Emily Wilson
+RX000158,PT000072,Mia Wilson,MED00012,Sertraline,250 mg,As needed,2022-03-19,Dr. Sarah Johnson
+RX000159,PT000096,Ava Lee,MED00028,Duloxetine,50 mg,As needed,2020-10-09,Dr. Sarah Johnson
+RX000160,PT000081,Michael Taylor,MED00039,Ciprofloxacin,100 mg,Every 12 hours,2020-05-13,Dr. Sarah Johnson
+RX000161,PT000054,Thomas Lee,MED00008,Simvastatin,20 mg,Every 12 hours,2021-02-03,Dr. Robert Brown
+RX000162,PT000091,Linda Clark,MED00014,Pantoprazole,10 mg,Once daily,2020-10-17,Dr. Elizabeth Taylor
+RX000163,PT000086,Michael Anderson,MED00015,Escitalopram,200 mg,Twice daily,2020-08-16,Dr. David Rodriguez
+RX000164,PT000095,Isabella Hernandez,MED00002,Metformin,5 mg,Every 12 hours,2021-02-21,Dr. Sarah Johnson
+RX000165,PT000090,Jennifer Harris,MED00050,Januvia,50 mg,Weekly,2021-08-19,Dr. Sarah Johnson
+RX000166,PT000042,Mary Rodriguez,MED00012,Sertraline,500 mg,Once daily,2022-04-28,Dr. Emily Wilson
+RX000167,PT000088,Linda Lewis,MED00047,Lyrica,10 mg,Twice daily,2023-06-23,Dr. Robert Brown
+RX000168,PT000010,John Jackson,MED00003,Atorvastatin,250 mg,Once daily,2023-09-07,Dr. Elizabeth Taylor
+RX000169,PT000053,William Miller,MED00039,Ciprofloxacin,250 mg,Weekly,2021-03-18,Dr. Elizabeth Taylor
+RX000170,PT000058,James Young,MED00013,Montelukast,20 mg,Three times daily,2021-02-11,Dr. Robert Brown
+RX000171,PT000033,Linda Young,MED00003,Atorvastatin,200 mg,Weekly,2021-06-23,Dr. Michael Chen
+RX000172,PT000015,Olivia Robinson,MED00050,Januvia,250 mg,Once daily,2021-11-14,Dr. Michael Chen
+RX000173,PT000077,Linda Thomas,MED00006,Metoprolol,5 mg,Three times daily,2023-04-21,Dr. Michael Chen
+RX000174,PT000028,Jessica White,MED00037,Alprazolam,200 mg,Once daily,2022-06-09,Dr. David Rodriguez
+RX000175,PT000088,Linda Lewis,MED00034,Hydrocodone,5 mg,Three times daily,2020-11-09,Dr. Elizabeth Taylor
+RX000176,PT000013,Susan Thompson,MED00031,Clopidogrel,5 mg,Twice daily,2020-10-09,Dr. Emily Wilson
+RX000177,PT000066,Elizabeth Lee,MED00016,Acetaminophen,200 mg,Once daily,2021-04-22,Dr. Elizabeth Taylor
+RX000178,PT000064,Ava King,MED00012,Sertraline,50 mg,Every 12 hours,2022-12-13,Dr. Michael Chen
+RX000179,PT000098,Jessica Miller,MED00036,Amoxicillin,100 mg,As needed,2023-06-27,Dr. Emily Wilson
+RX000180,PT000035,Ava Garcia,MED00012,Sertraline,500 mg,Weekly,2023-09-30,Dr. Elizabeth Taylor
+RX000181,PT000032,Charles Taylor,MED00046,Diazepam,25 mg,Once daily,2020-09-22,Dr. Robert Brown
+RX000182,PT000045,David Davis,MED00016,Acetaminophen,250 mg,Once daily,2021-08-08,Dr. Robert Brown
+RX000183,PT000093,Barbara Allen,MED00021,Albuterol,100 mg,Once daily,2023-05-17,Dr. Elizabeth Taylor
+RX000184,PT000055,Patricia Williams,MED00015,Escitalopram,50 mg,As needed,2021-10-13,Dr. David Rodriguez
+RX000185,PT000050,Mary Martin,MED00016,Acetaminophen,200 mg,As needed,2021-02-03,Dr. Robert Brown
+RX000186,PT000073,Mary Jackson,MED00005,Amlodipine,50 mg,Three times daily,2022-01-31,Dr. Elizabeth Taylor
+RX000187,PT000020,Elizabeth Clark,MED00008,Simvastatin,200 mg,Three times daily,2021-12-13,Dr. Elizabeth Taylor
+RX000188,PT000030,Aiden Davis,MED00032,Clonazepam,500 mg,Every 12 hours,2020-08-31,Dr. Sarah Johnson
+RX000189,PT000036,Emma Clark,MED00026,Rosuvastatin,10 mg,Three times daily,2020-04-25,Dr. Robert Brown
+RX000190,PT000027,Mary Taylor,MED00006,Metoprolol,10 mg,As needed,2023-10-02,Dr. Elizabeth Taylor
+RX000191,PT000009,Noah Garcia,MED00023,Tramadol,250 mg,Every 12 hours,2023-10-07,Dr. Robert Brown
+RX000192,PT000047,Olivia Wilson,MED00002,Metformin,20 mg,Weekly,2022-10-26,Dr. Sarah Johnson
+RX000193,PT000068,Aiden Martin,MED00036,Amoxicillin,10 mg,Three times daily,2020-02-15,Dr. Sarah Johnson
+RX000194,PT000038,Sophia Brown,MED00050,Januvia,20 mg,Three times daily,2022-07-16,Dr. Sarah Johnson
+RX000195,PT000090,Jennifer Harris,MED00032,Clonazepam,100 mg,Weekly,2021-06-21,Dr. Emily Wilson
+RX000196,PT000069,Sarah Lee,MED00035,Venlafaxine,250 mg,As needed,2023-01-07,Dr. David Rodriguez
+RX000197,PT000044,Patricia Moore,MED00048,Xyzal,25 mg,Once daily,2020-06-14,Dr. David Rodriguez
+RX000198,PT000053,William Miller,MED00008,Simvastatin,50 mg,Once daily,2022-05-21,Dr. Sarah Johnson
+RX000199,PT000011,Robert Harris,MED00028,Duloxetine,500 mg,Every 12 hours,2023-05-23,Dr. Elizabeth Taylor
+RX000200,PT000045,David Davis,MED00048,Xyzal,5 mg,Weekly,2021-10-25,Dr. David Rodriguez
+RX000201,PT000099,Charles Hall,MED00039,Ciprofloxacin,100 mg,Three times daily,2022-05-27,Dr. Robert Brown
+RX000202,PT000021,Ava Lee,MED00044,Pravastatin,250 mg,Three times daily,2023-07-20,Dr. Emily Wilson
+RX000203,PT000054,Thomas Lee,MED00047,Lyrica,100 mg,Twice daily,2021-05-24,Dr. Sarah Johnson
+RX000204,PT000090,Jennifer Harris,MED00010,Gabapentin,150 mg,Three times daily,2020-10-04,Dr. Robert Brown
+RX000205,PT000033,Linda Young,MED00024,Furosemide,200 mg,Twice daily,2020-05-12,Dr. Sarah Johnson
+RX000206,PT000048,Sarah Taylor,MED00005,Amlodipine,250 mg,Twice daily,2022-11-14,Dr. David Rodriguez
+RX000207,PT000096,Ava Lee,MED00037,Alprazolam,20 mg,Three times daily,2022-12-30,Dr. David Rodriguez
+RX000208,PT000100,Jessica Jones,MED00032,Clonazepam,500 mg,Every 12 hours,2021-04-19,Dr. Emily Wilson
+RX000209,PT000036,Emma Clark,MED00036,Amoxicillin,250 mg,Three times daily,2020-05-24,Dr. Emily Wilson
+RX000210,PT000040,Joseph Clark,MED00045,Methylprednisolone,100 mg,Once daily,2020-10-27,Dr. Sarah Johnson
+RX000211,PT000016,Karen Smith,MED00005,Amlodipine,100 mg,Once daily,2020-10-13,Dr. David Rodriguez
+RX000212,PT000092,Sophia Martin,MED00024,Furosemide,50 mg,Three times daily,2021-07-23,Dr. Robert Brown
+RX000213,PT000050,Mary Martin,MED00049,Vyvanse,150 mg,Once daily,2023-03-01,Dr. David Rodriguez
+RX000214,PT000014,Olivia Thomas,MED00026,Rosuvastatin,50 mg,Twice daily,2020-06-13,Dr. Michael Chen
+RX000215,PT000089,Linda Brown,MED00037,Alprazolam,50 mg,Every 12 hours,2023-02-10,Dr. David Rodriguez
+RX000216,PT000043,Sophia Martinez,MED00009,Losartan,200 mg,Three times daily,2020-07-24,Dr. Robert Brown
+RX000217,PT000100,Jessica Jones,MED00021,Albuterol,50 mg,Twice daily,2022-04-28,Dr. Robert Brown
+RX000218,PT000059,Aiden Taylor,MED00039,Ciprofloxacin,10 mg,As needed,2020-01-06,Dr. David Rodriguez
+RX000219,PT000061,Karen Anderson,MED00050,Januvia,5 mg,Weekly,2023-01-11,Dr. Michael Chen
+RX000220,PT000077,Linda Thomas,MED00007,Omeprazole,50 mg,Weekly,2023-01-16,Dr. Sarah Johnson
+RX000221,PT000029,Richard Lewis,MED00047,Lyrica,10 mg,Once daily,2023-02-12,Dr. Elizabeth Taylor
+RX000222,PT000028,Jessica White,MED00039,Ciprofloxacin,100 mg,Weekly,2022-07-21,Dr. Elizabeth Taylor
+RX000223,PT000014,Olivia Thomas,MED00026,Rosuvastatin,20 mg,Every 12 hours,2021-05-14,Dr. Sarah Johnson
+RX000224,PT000082,Noah Martinez,MED00033,Meloxicam,250 mg,Weekly,2022-11-18,Dr. Sarah Johnson
+RX000225,PT000050,Mary Martin,MED00028,Duloxetine,500 mg,As needed,2021-08-18,Dr. David Rodriguez
+RX000226,PT000064,Ava King,MED00020,Fluticasone,500 mg,As needed,2020-08-11,Dr. David Rodriguez
+RX000227,PT000096,Ava Lee,MED00008,Simvastatin,250 mg,Once daily,2022-10-04,Dr. David Rodriguez
+RX000228,PT000038,Sophia Brown,MED00015,Escitalopram,20 mg,Once daily,2022-01-09,Dr. Elizabeth Taylor
+RX000229,PT000057,Sophia Taylor,MED00041,Oxycodone,500 mg,Twice daily,2023-09-30,Dr. Emily Wilson
+RX000230,PT000073,Mary Jackson,MED00031,Clopidogrel,250 mg,Three times daily,2022-04-13,Dr. Elizabeth Taylor
+RX000231,PT000071,Barbara Thomas,MED00005,Amlodipine,20 mg,Weekly,2022-03-07,Dr. Elizabeth Taylor
+RX000232,PT000087,Aiden Martinez,MED00024,Furosemide,10 mg,Every 12 hours,2020-11-10,Dr. Sarah Johnson
+RX000233,PT000056,Richard Martinez,MED00032,Clonazepam,5 mg,Weekly,2020-01-23,Dr. Elizabeth Taylor
+RX000234,PT000091,Linda Clark,MED00047,Lyrica,20 mg,Weekly,2022-01-27,Dr. Emily Wilson
+RX000235,PT000010,John Jackson,MED00008,Simvastatin,150 mg,As needed,2020-05-28,Dr. Robert Brown
+RX000236,PT000064,Ava King,MED00022,Prednisone,250 mg,Twice daily,2022-06-09,Dr. Robert Brown
+RX000237,PT000050,Mary Martin,MED00013,Montelukast,10 mg,Weekly,2020-11-04,Dr. Michael Chen
+RX000238,PT000023,Charles Taylor,MED00006,Metoprolol,10 mg,Twice daily,2021-09-27,Dr. Elizabeth Taylor
+RX000239,PT000050,Mary Martin,MED00026,Rosuvastatin,250 mg,Once daily,2020-02-12,Dr. David Rodriguez
+RX000240,PT000083,Emma Thompson,MED00047,Lyrica,10 mg,Three times daily,2021-11-04,Dr. Elizabeth Taylor
+RX000241,PT000034,Thomas Miller,MED00031,Clopidogrel,25 mg,Twice daily,2021-03-12,Dr. Sarah Johnson
+RX000242,PT000089,Linda Brown,MED00012,Sertraline,25 mg,Three times daily,2022-09-29,Dr. Elizabeth Taylor
+RX000243,PT000036,Emma Clark,MED00025,Azithromycin,25 mg,As needed,2022-08-23,Dr. Emily Wilson
+RX000244,PT000097,Charles Lee,MED00023,Tramadol,100 mg,Every 12 hours,2021-02-07,Dr. Sarah Johnson
+RX000245,PT000053,William Miller,MED00016,Acetaminophen,25 mg,Twice daily,2022-09-09,Dr. Emily Wilson
+RX000246,PT000013,Susan Thompson,MED00046,Diazepam,5 mg,Weekly,2020-11-02,Dr. Elizabeth Taylor
+RX000247,PT000014,Olivia Thomas,MED00032,Clonazepam,5 mg,Every 12 hours,2023-10-21,Dr. Sarah Johnson
+RX000248,PT000060,William Lee,MED00046,Diazepam,50 mg,Once daily,2023-03-29,Dr. Michael Chen
+RX000249,PT000084,Liam Anderson,MED00008,Simvastatin,200 mg,Weekly,2021-05-16,Dr. Sarah Johnson
+RX000250,PT000002,Michael Moore,MED00017,Ibuprofen,10 mg,Every 12 hours,2023-05-29,Dr. Elizabeth Taylor
+RX000251,PT000012,Noah Harris,MED00040,Trazodone,150 mg,Every 12 hours,2022-11-02,Dr. David Rodriguez
+RX000252,PT000004,Elizabeth Davis,MED00036,Amoxicillin,50 mg,Three times daily,2020-10-23,Dr. David Rodriguez
+RX000253,PT000100,Jessica Jones,MED00039,Ciprofloxacin,100 mg,Every 12 hours,2023-09-23,Dr. Elizabeth Taylor
+RX000254,PT000060,William Lee,MED00012,Sertraline,5 mg,Every 12 hours,2021-05-22,Dr. Emily Wilson
+RX000255,PT000081,Michael Taylor,MED00005,Amlodipine,250 mg,Twice daily,2022-04-19,Dr. Emily Wilson
+RX000256,PT000100,Jessica Jones,MED00017,Ibuprofen,25 mg,As needed,2022-10-20,Dr. Sarah Johnson
+RX000257,PT000019,Jennifer Young,MED00006,Metoprolol,50 mg,Three times daily,2020-10-11,Dr. Emily Wilson
+RX000258,PT000012,Noah Harris,MED00003,Atorvastatin,250 mg,Every 12 hours,2020-01-02,Dr. Michael Chen
+RX000259,PT000050,Mary Martin,MED00019,Fluoxetine,500 mg,Three times daily,2020-12-08,Dr. Sarah Johnson
+RX000260,PT000016,Karen Smith,MED00021,Albuterol,50 mg,Twice daily,2023-02-04,Dr. David Rodriguez
+RX000261,PT000084,Liam Anderson,MED00010,Gabapentin,150 mg,As needed,2022-09-30,Dr. David Rodriguez
+RX000262,PT000061,Karen Anderson,MED00042,Lorazepam,150 mg,Once daily,2021-10-12,Dr. Sarah Johnson
+RX000263,PT000100,Jessica Jones,MED00040,Trazodone,200 mg,Three times daily,2021-06-10,Dr. Emily Wilson
+RX000264,PT000081,Michael Taylor,MED00011,Hydrochlorothiazide,20 mg,Three times daily,2021-12-01,Dr. Michael Chen
+RX000265,PT000028,Jessica White,MED00002,Metformin,500 mg,Twice daily,2023-05-02,Dr. Sarah Johnson
+RX000266,PT000095,Isabella Hernandez,MED00030,Warfarin,200 mg,Every 12 hours,2020-10-16,Dr. Elizabeth Taylor
+RX000267,PT000057,Sophia Taylor,MED00046,Diazepam,5 mg,As needed,2022-09-12,Dr. Michael Chen
+RX000268,PT000009,Noah Garcia,MED00005,Amlodipine,150 mg,Every 12 hours,2020-11-05,Dr. Michael Chen
+RX000269,PT000026,John Walker,MED00009,Losartan,250 mg,Twice daily,2021-02-22,Dr. David Rodriguez
+RX000270,PT000082,Noah Martinez,MED00015,Escitalopram,20 mg,Twice daily,2023-11-29,Dr. Sarah Johnson
+RX000271,PT000039,Charles Jones,MED00041,Oxycodone,5 mg,Three times daily,2021-07-05,Dr. Emily Wilson
+RX000272,PT000058,James Young,MED00028,Duloxetine,10 mg,As needed,2021-11-18,Dr. Michael Chen
+RX000273,PT000004,Elizabeth Davis,MED00005,Amlodipine,25 mg,Twice daily,2020-09-22,Dr. Michael Chen
+RX000274,PT000042,Mary Rodriguez,MED00048,Xyzal,5 mg,Every 12 hours,2023-10-22,Dr. Michael Chen
+RX000275,PT000100,Jessica Jones,MED00005,Amlodipine,10 mg,Twice daily,2021-09-17,Dr. Sarah Johnson
+RX000276,PT000055,Patricia Williams,MED00011,Hydrochlorothiazide,250 mg,As needed,2020-06-06,Dr. Sarah Johnson
+RX000277,PT000071,Barbara Thomas,MED00049,Vyvanse,10 mg,Once daily,2023-01-06,Dr. Sarah Johnson
+RX000278,PT000035,Ava Garcia,MED00048,Xyzal,100 mg,Every 12 hours,2020-02-08,Dr. Elizabeth Taylor
+RX000279,PT000055,Patricia Williams,MED00036,Amoxicillin,500 mg,Weekly,2021-09-04,Dr. David Rodriguez
+RX000280,PT000043,Sophia Martinez,MED00022,Prednisone,250 mg,As needed,2020-04-09,Dr. Emily Wilson
+RX000281,PT000099,Charles Hall,MED00037,Alprazolam,100 mg,As needed,2020-06-14,Dr. David Rodriguez
+RX000282,PT000058,James Young,MED00015,Escitalopram,150 mg,Three times daily,2020-03-03,Dr. Elizabeth Taylor
+RX000283,PT000071,Barbara Thomas,MED00048,Xyzal,25 mg,Every 12 hours,2022-07-03,Dr. Robert Brown
+RX000284,PT000097,Charles Lee,MED00020,Fluticasone,10 mg,Three times daily,2023-08-03,Dr. Sarah Johnson
+RX000285,PT000074,Robert Lewis,MED00025,Azithromycin,150 mg,As needed,2021-04-05,Dr. Emily Wilson
+RX000286,PT000028,Jessica White,MED00012,Sertraline,150 mg,Twice daily,2020-09-13,Dr. Emily Wilson
+RX000287,PT000079,Sarah Martin,MED00029,Citalopram,100 mg,Weekly,2022-01-13,Dr. Robert Brown
+RX000288,PT000048,Sarah Taylor,MED00014,Pantoprazole,25 mg,Weekly,2022-01-03,Dr. Elizabeth Taylor
+RX000289,PT000086,Michael Anderson,MED00013,Montelukast,10 mg,Weekly,2020-07-18,Dr. David Rodriguez
+RX000290,PT000063,Jackson Hernandez,MED00025,Azithromycin,25 mg,Weekly,2023-02-25,Dr. Elizabeth Taylor
+RX000291,PT000078,Michael King,MED00036,Amoxicillin,250 mg,Twice daily,2022-01-26,Dr. David Rodriguez
+RX000292,PT000038,Sophia Brown,MED00038,Bupropion,25 mg,Weekly,2020-02-18,Dr. Sarah Johnson
+RX000293,PT000006,Robert Martin,MED00043,Cyclobenzaprine,150 mg,Twice daily,2023-08-22,Dr. Sarah Johnson
+RX000294,PT000067,John Brown,MED00038,Bupropion,250 mg,Weekly,2022-08-28,Dr. Elizabeth Taylor
+RX000295,PT000034,Thomas Miller,MED00022,Prednisone,25 mg,Twice daily,2021-07-03,Dr. Michael Chen
+RX000296,PT000009,Noah Garcia,MED00041,Oxycodone,500 mg,Twice daily,2022-04-05,Dr. Robert Brown
+RX000297,PT000052,Noah Hall,MED00039,Ciprofloxacin,20 mg,Weekly,2022-11-17,Dr. Michael Chen
+RX000298,PT000042,Mary Rodriguez,MED00044,Pravastatin,500 mg,Every 12 hours,2023-05-15,Dr. Robert Brown
+RX000299,PT000001,Jackson Robinson,MED00004,Levothyroxine,20 mg,As needed,2023-03-14,Dr. Emily Wilson
+RX000300,PT000021,Ava Lee,MED00026,Rosuvastatin,250 mg,Three times daily,2020-07-07,Dr. Sarah Johnson

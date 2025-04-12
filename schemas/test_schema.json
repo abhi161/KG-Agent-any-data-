@@ -1,0 +1,32 @@
+{
+  "entity_types": [
+    {
+      "name": "Person",
+      "description": "A person entity",
+      "properties": [
+        "name",
+        "title"
+      ]
+    },
+    {
+      "name": "Company",
+      "description": "A company entity",
+      "properties": [
+        "name",
+        "industry"
+      ]
+    }
+  ],
+  "relation_types": [
+    {
+      "name": "WORKS_FOR",
+      "description": "Person works for a company",
+      "source_types": [
+        "Person"
+      ],
+      "target_types": [
+        "Company"
+      ]
+    }
+  ]
+}
