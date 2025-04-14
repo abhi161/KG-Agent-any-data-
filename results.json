@@ -1,18 +1,20 @@
 {
   "csv_files_processed": 4,
   "pdf_files_processed": 2,
-  "entities_created": 13,
-  "relationships_created": 1304,
-  "start_time": "2025-04-10T09:09:11.469825",
-  "end_time": "2025-04-10T09:10:25.090076",
+  "entities_created": 89,
+  "relationships_created": 12433,
+  "start_time": "2025-04-13T17:06:03.347140",
+  "end_time": "2025-04-13T18:09:39.526305",
   "entity_resolution": {
-    "exact_matches": 1230,
+    "exact_matches": 2199,
     "fuzzy_matches": 0,
-    "llm_resolved": 4,
-    "new_entities": 13
+    "vector_matches": 1143,
+    "llm_resolved": 1,
+    "new_entities": 89
   },
   "pending_schema_changes": {
-    "entity_types": 6,
-    "relation_types": 0
-  }
+    "entity_types": 19,
+    "relation_types": 43
+  },
+  "processing_time_seconds": 3820.571516275406
 }

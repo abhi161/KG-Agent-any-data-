@@ -1,4 +1,3 @@
-# unified_kg/core/kg_builder.py
 from typing import Dict, List, Any, Optional, Tuple
 import logging
 import pandas as pd
@@ -14,22 +13,21 @@ logger = logging.getLogger(__name__)
 class LLMEnhancedKnowledgeGraph:
     """
     Main class for building a unified knowledge graph from structured and unstructured data
+    with vector embeddings support
     """
-    @staticmethod
-    def sanitize_label(label):
-        """Convert entity type names to valid Neo4j labels (no spaces)"""
-        return label.replace(' ', '_')
         
-    def __init__(self, llm, graph_db, initial_schema: Optional[Dict[str, Any]] = None, 
+    def __init__(self, llm, graph_db, embeddings, initial_schema: Optional[Dict[str, Any]] = None, 
                  config: Optional[Dict[str, Any]] = None):
         self.llm = llm
         self.graph_db = graph_db
+        self.embeddings = embeddings
         self.config = config or {}
         
         # Initialize components
-        self.entity_resolution = EntityResolution(llm, graph_db)
+        self.entity_resolution = EntityResolution(llm, graph_db, embeddings)
         self.data_processor = DataProcessor(
             llm, 
+            embeddings=embeddings,  # Pass embeddings to data processor
             chunk_size=self.config.get("chunk_size", 3000),
             chunk_overlap=self.config.get("chunk_overlap", 200)
         )
@@ -47,9 +45,14 @@ class LLMEnhancedKnowledgeGraph:
             "start_time": datetime.now().isoformat()
         }
     
+    @staticmethod
+    def sanitize_label(label):
+        """Convert entity type names to valid Neo4j labels (no spaces)"""
+        return label.replace(' ', '_')
+    
     def process_csv_file(self, file_path: str, column_mappings: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
-        Process a CSV file and add it to the knowledge graph
+        Process a CSV file and add it to the knowledge graph with vector embeddings
         
         Args:
             file_path: Path to the CSV file
@@ -85,7 +88,7 @@ class LLMEnhancedKnowledgeGraph:
     def _process_csv_entities(self, df: pd.DataFrame, column_mappings: Dict[str, str], 
                               source: str) -> List[Dict[str, Any]]:
         """
-        Process entities from a CSV DataFrame
+        Process entities from a CSV DataFrame with vector embeddings
         
         Args:
             df: DataFrame to process
@@ -128,7 +131,7 @@ class LLMEnhancedKnowledgeGraph:
                                 prop_name = prop_col.replace(" ", "_").lower()
                                 properties[prop_name] = row[prop_col]
                         
-                        # Process entity
+                        # Process entity - generate embedding will happen inside
                         entity_id = self._add_or_update_entity(entity_name, entity_type, properties, source)
                         
                         row_entities[column] = {
@@ -146,7 +149,7 @@ class LLMEnhancedKnowledgeGraph:
     def _add_or_update_entity(self, name: str, entity_type: str, properties: Dict[str, Any], 
                               source: str) -> str:
         """
-        Add a new entity or update an existing one
+        Add a new entity or update an existing one with vector embedding
         
         Args:
             name: Entity name
@@ -173,41 +176,12 @@ class LLMEnhancedKnowledgeGraph:
         match = self.entity_resolution.find_matching_entity(name, entity_type, properties)
         
         if match:
-            # Update existing entity
+            # Update existing entity - embedding will be updated in merge_entity_properties
             self.entity_resolution.merge_entity_properties(match["id"], properties, source)
             return match["id"]
         else:
-            # Create a new entity
-            # Generate a unique ID
-            import hashlib
-            unique_id = hashlib.md5(f"{entity_type}:{name}".encode()).hexdigest()
-            
-            # Create entity
-            query = f"""
-            CREATE (e:{entity_type} {{id: $id, name: $name}})
-            RETURN elementId(e) as id
-            """
-            
-            params = {
-                "id": unique_id,
-                "name": name
-            }
-            
-            result = self.graph_db.query(query, params)
-            entity_id = result[0]["id"]
-            
-            # Add properties
-            if properties:
-                property_strings = [f"e.{k} = ${k}" for k in properties.keys()]
-                set_clause = ", ".join(property_strings)
-                
-                query = f"""
-                MATCH (e) WHERE elementId(e) = $id
-                SET {set_clause}
-                """
-                
-                params = {"id": entity_id, **properties}
-                self.graph_db.query(query, params)
+            # Create a new entity with embedding
+            entity_id = self.entity_resolution.create_new_entity(name, entity_type, properties, source)
             
             # Update statistics
             self.stats["entities_created"] += 1
@@ -311,7 +285,7 @@ class LLMEnhancedKnowledgeGraph:
     
     def process_pdf_file(self, file_path: str) -> Dict[str, Any]:
         """
-        Process a PDF file and add it to the knowledge graph
+        Process a PDF file and add it to the knowledge graph with vector embeddings
         
         Args:
             file_path: Path to the PDF file
@@ -359,7 +333,7 @@ class LLMEnhancedKnowledgeGraph:
     
     def _process_pdf_entities(self, entities: List[Dict[str, Any]], source: str, 
                          chunk_idx: int) -> Dict[str, Dict[str, Any]]:
-        """Process entities from a PDF chunk"""
+        """Process entities from a PDF chunk with vector embeddings"""
         chunk_entities = {}
         
         for entity in entities:
@@ -369,7 +343,7 @@ class LLMEnhancedKnowledgeGraph:
                 "chunk_index": chunk_idx
             }
             
-            # Add attributes - handle complex types properly
+            # Add attributes with special handling for complex types
             if "attributes" in entity:
                 for key, value in entity["attributes"].items():
                     # Clean property name
@@ -396,6 +370,16 @@ class LLMEnhancedKnowledgeGraph:
                     else:
                         # For primitive types, use directly
                         properties[prop_name] = value
+            
+            # Add full text context for better embedding
+            if self.data_processor.document_metadata and chunk_idx in self.data_processor.document_metadata:
+                chunk_metadata = self.data_processor.document_metadata[chunk_idx]
+                if "page" in chunk_metadata:
+                    properties["page"] = chunk_metadata["page"]
+                    
+            # Extract additional text context around the entity if available
+            if "context" in entity:
+                properties["context"] = entity["context"]
             
             # Process entity
             entity_id = self._add_or_update_entity(
@@ -448,7 +432,7 @@ class LLMEnhancedKnowledgeGraph:
                 f"{source}:chunk{chunk_idx}"
             )
             
-            # Create relationship
+            # Create relationship with potential semantic properties
             query = f"""
             MATCH (a), (b) 
             WHERE elementId(a) = $id1 AND elementId(b) = $id2
@@ -457,12 +441,18 @@ class LLMEnhancedKnowledgeGraph:
                 r.chunk_index = $chunk_idx
             """
             
+            # Add additional properties if present
             params = {
                 "id1": source_entity["id"],
                 "id2": target_entity["id"],
                 "source": source,
                 "chunk_idx": chunk_idx
             }
+            
+            # Add context or other properties if available
+            if isinstance(relation, dict) and "context" in relation:
+                query = query.replace("SET r.source", "SET r.context = $context, r.source")
+                params["context"] = relation["context"]
             
             self.graph_db.query(query, params)
             
@@ -481,7 +471,7 @@ class LLMEnhancedKnowledgeGraph:
     def _cross_reference_pdf_entities(self, entities_by_chunk: List[Dict[str, Dict[str, Any]]], 
                                       source: str) -> None:
         """
-        Cross-reference entities across chunks in the same PDF
+        Cross-reference entities across chunks in the same PDF using both name and vector similarity
         
         Args:
             entities_by_chunk: List of dictionaries with entities by chunk
@@ -523,10 +513,101 @@ class LLMEnhancedKnowledgeGraph:
                     
                     # Update statistics
                     self.stats["relationships_created"] += 1
+        
+        # Vector-based cross-referencing
+        # For entities that don't co-occur but might be semantically related
+        self._vector_cross_reference(all_entities, source)
+    
+    def _vector_cross_reference(self, entities: Dict[str, Dict[str, Any]], source: str) -> None:
+        """
+        Cross-reference entities based on vector similarity using global index
+        
+        Args:
+            entities: Dictionary of entities
+            source: Source identifier
+        """
+        entity_list = list(entities.values())
+        
+        # For larger entity sets, we might need to batch this
+        if len(entity_list) > 100:
+            logger.info(f"Large entity set detected ({len(entity_list)} entities). Using batch vector cross-referencing.")
+            batch_size = 50
+            for i in range(0, len(entity_list), batch_size):
+                batch = entity_list[i:i+batch_size]
+                self._batch_vector_cross_reference(batch, source)
+        else:
+            self._batch_vector_cross_reference(entity_list, source)
+
+    def _batch_vector_cross_reference(self, entities: List[Dict[str, Any]], source: str) -> None:
+        """
+        Cross-reference a batch of entities based on vector similarity using global index
+        
+        Args:
+            entities: List of entities to cross-reference
+            source: Source identifier
+        """
+        for entity in entities:
+            # Get the entity's embedding
+            embedding_query = """
+            MATCH (n) WHERE elementId(n) = $id
+            RETURN n.embedding as embedding
+            """
+            
+            embedding_result = self.graph_db.query(embedding_query, {"id": entity["id"]})
+            
+            if not embedding_result or not embedding_result[0]["embedding"]:
+                continue
+                
+            embedding = embedding_result[0]["embedding"]
+            
+            # Find semantically similar entities using global vector index
+            query = """
+            CALL db.index.vector.queryNodes(
+                'global_embedding_index',
+                10,  // Return top 10 results
+                $embedding
+            ) YIELD node, score
+            WHERE elementId(node) <> $entity_id  // Exclude self
+            AND score > 0.85  // High threshold for strong semantic similarity
+            AND NOT (node)-[:SEMANTICALLY_SIMILAR_TO]-(:Entity {id: $entity_id})
+            RETURN node, elementId(node) as id, score
+            ORDER BY score DESC
+            LIMIT 5
+            """
+            
+            similar_entities = self.graph_db.query(
+                query, 
+                {
+                    "entity_id": entity["id"],
+                    "embedding": embedding
+                }
+            )
+            
+            # Create semantic similarity relationships
+            for similar in similar_entities:
+                sim_query = """
+                MATCH (a), (b) 
+                WHERE elementId(a) = $id1 AND elementId(b) = $id2
+                MERGE (a)-[r:SEMANTICALLY_SIMILAR_TO]->(b)
+                SET r.similarity = $similarity,
+                    r.source = $source
+                """
+                
+                sim_params = {
+                    "id1": entity["id"],
+                    "id2": similar["id"],
+                    "similarity": similar["score"],
+                    "source": f"vector_similarity:{source}"
+                }
+                
+                self.graph_db.query(sim_query, sim_params)
+                
+                # Update statistics
+                self.stats["relationships_created"] += 1
     
     def cross_reference_data_sources(self) -> Dict[str, Any]:
         """
-        Cross-reference entities between different data sources
+        Cross-reference entities between different data sources using both name matching and vector similarity
         
         Returns:
             Dictionary with cross-referencing statistics
@@ -535,9 +616,25 @@ class LLMEnhancedKnowledgeGraph:
         
         cross_ref_stats = {
             "entity_matches": 0,
-            "new_relationships": 0
+            "new_relationships": 0,
+            "vector_matches": 0
         }
         
+        # First approach: Find entities that appear in both structured and unstructured data
+        self._cross_reference_by_name(cross_ref_stats)
+        
+        # Second approach: Use vector similarity to find related entities across sources
+        self._cross_reference_by_vector(cross_ref_stats)
+        
+        return cross_ref_stats
+    
+    def _cross_reference_by_name(self, stats: Dict[str, int]) -> None:
+        """
+        Cross-reference entities by name
+        
+        Args:
+            stats: Statistics dictionary to update
+        """
         # Find entities that appear in both structured and unstructured data
         bridge_entities = self.graph_db.query(
             """
@@ -616,9 +713,117 @@ class LLMEnhancedKnowledgeGraph:
                         self.graph_db.query(query, params)
                         
                         # Update statistics
-                        cross_ref_stats["new_relationships"] += 1
+                        stats["new_relationships"] += 1
+    
+    def _cross_reference_by_vector(self, stats: Dict[str, int]) -> None:
+        """
+        Cross-reference entities by vector similarity across different data sources using global index
         
-        return cross_ref_stats
+        Args:
+            stats: Statistics dictionary to update
+        """
+        # Find CSV entities with embeddings
+        csv_entities = self.graph_db.query(
+            """
+            MATCH (n)
+            WHERE any(source in [n.source] WHERE source CONTAINS '.csv')
+            AND n.embedding IS NOT NULL
+            RETURN n.name as name, labels(n)[0] as type, elementId(n) as id, n.embedding as embedding
+            LIMIT 1000  // Reasonable limit
+            """
+        )
+        
+        # For each CSV entity, find similar PDF entities using global vector index
+        for csv_entity in csv_entities:
+            # Skip entities without embeddings
+            if not csv_entity["embedding"]:
+                continue
+                
+            # Find similar PDF entities using global vector index
+            query = """
+            CALL db.index.vector.queryNodes(
+                'global_embedding_index',
+                10,  // Return top 10 results
+                $embedding
+            ) YIELD node, score
+            WHERE elementId(node) <> $entity_id
+            AND any(source in [node.source] WHERE source CONTAINS '.pdf')
+            AND score > 0.80  // Threshold for cross-source similarity
+            AND NOT (node)-[:CROSS_SOURCE_SIMILAR_TO]->(:Entity {id: $entity_id})
+            RETURN node, elementId(node) as id, score
+            ORDER BY score DESC
+            LIMIT 5
+            """
+            
+            similar_entities = self.graph_db.query(
+                query, 
+                {
+                    "entity_id": csv_entity["id"],
+                    "embedding": csv_entity["embedding"]
+                }
+            )
+            
+            # Create semantic similarity relationships
+            for similar in similar_entities:
+                # First, evaluate if the relationship makes sense using LLM
+                should_connect = self._evaluate_vector_similarity_connection(
+                    csv_entity,
+                    {"id": similar["id"], "name": similar["node"].get("name"), "type": list(similar["node"].labels)[0]},
+                    similar["score"]
+                )
+                
+                if should_connect:
+                    sim_query = """
+                    MATCH (a), (b) 
+                    WHERE elementId(a) = $id1 AND elementId(b) = $id2
+                    MERGE (a)-[r:CROSS_SOURCE_SIMILAR_TO]->(b)
+                    SET r.similarity = $similarity,
+                        r.source = 'vector_cross_reference'
+                    """
+                    
+                    sim_params = {
+                        "id1": csv_entity["id"],
+                        "id2": similar["id"],
+                        "similarity": similar["score"]
+                    }
+                    
+                    self.graph_db.query(sim_query, sim_params)
+                    
+                    # Update statistics
+                    stats["vector_matches"] += 1
+        
+    def _evaluate_vector_similarity_connection(self, entity1: Dict[str, Any], entity2: Dict[str, Any], 
+                                              similarity: float) -> bool:
+        """
+        Evaluate if two entities should be connected based on vector similarity
+        
+        Args:
+            entity1: First entity
+            entity2: Second entity
+            similarity: Vector similarity score
+            
+        Returns:
+            True if they should be connected, False otherwise
+        """
+        prompt = f"""
+        Evaluate if these two entities should be connected in our knowledge graph based on semantic similarity:
+        
+        Entity 1: {entity1["name"]} (Type: {entity1["type"]})
+        Entity 2: {entity2["name"]} (Type: {entity2["type"]})
+        
+        Vector Similarity Score: {similarity:.2f} (scale: 0-1, where 1 is identical)
+        
+        Should these entities have a semantic relationship?
+        Answer with YES or NO only.
+        """
+        
+        try:
+            response = self.llm.predict(prompt).strip().upper()
+            return "YES" in response
+        except Exception as e:
+            logger.warning(f"Error evaluating vector similarity connection: {e}")
+            # Fall back to threshold-based decision
+            return similarity > 0.85
     
     def _evaluate_cross_source_connection(self, entity1: Dict[str, Any], entity2: Dict[str, Any], 
                                           bridge: Dict[str, Any]) -> Optional[str]:
