@@ -1,4 +1,16 @@
-CLINICAL ADVANCES IN HYPERTENSION MANAGEMENT
+from fpdf import FPDF
+
+# Create instance of FPDF class
+pdf = FPDF()
+
+# Add a page to the PDF
+pdf.add_page()
+
+# Set font: using Arial, regular, size 12
+pdf.set_font("Arial", size=12)
+
+# Your text content
+text = """CLINICAL ADVANCES IN HYPERTENSION MANAGEMENT
 Volume 28, No. 3 - March 2023
 
 Abstract
@@ -20,3 +32,12 @@ Conclusion
 Successful hypertension management in complex patients requires interdisciplinary coordination. Electronic medical records should flag potential medication interactions, particularly when patients receive care across multiple specialties.
 
 Keywords: hypertension, comorbidity, atenolol, diabetes, medication interaction
+"""
+
+# Split text into lines and add each line to the PDF
+for line in text.splitlines():
+    # Add a cell with the line; ln=True moves to the next line
+    pdf.cell(0, 10, line, ln=True)
+
+# Output the PDF file
+pdf.output("research_paper.pdf")

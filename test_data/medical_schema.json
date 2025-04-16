@@ -1,122 +1,82 @@
 {
   "entity_types": [
     {
-      "name": "Patient",
-      "description": "A person receiving medical care",
-      "properties": [
-        "patient_id",
-        "first_name",
-        "last_name",
-        "full_name",
-        "gender",
-        "age",
-        "blood_type",
-        "registration_date"
-      ]
-    },
-    {
-      "name": "Medication",
-      "description": "A pharmaceutical drug or treatment",
-      "properties": [
-        "medication_id",
-        "medication_name",
-        "category",
-        "manufacturer",
-        "approval_year"
-      ]
-    },
-    {
-      "name": "Doctor",
-      "description": "A medical professional",
-      "properties": [
-        "doctor_id",
-        "full_name",
-        "specialty",
-        "hospital",
-        "years_of_experience"
-      ]
-    },
-    {
-      "name": "Condition",
-      "description": "A medical condition or disease",
-      "properties": [
-        "name",
-        "description",
-        "icd_code",
-        "category"
-      ]
-    },
-    {
-      "name": "Prescription",
-      "description": "A prescription for medication",
-      "properties": [
-        "prescription_id",
-        "dosage",
-        "frequency",
-        "prescription_date"
-      ]
-    }
+        "name": "Patient",
+        "description": "A person receiving medical care",
+        "properties": ["patient_id", "name", "age", "gender", "blood_type", "chronic_condition"],
+        "identifier_property": "patient_id"  
+      },
+      {
+        "name": "Doctor",
+        "description": "A healthcare provider",
+        "properties": ["doctor_id", "name", "specialty", "hospital"],
+        "identifier_property": "doctor_id"   
+      },
+      {
+        "name": "Medication",
+        "description": "A drug or therapeutic substance",
+        "properties": ["med_id", "brand_name", "generic_name", "classification", "manufacturer"],
+        "identifier_property": "med_id"      
+        },
+      {
+        "name": "Prescription",
+        "description": "A medication order for a patient",
+        "properties": ["prescription_id", "dosage", "date_prescribed"],
+        "identifier_property": "prescription_id" 
+      },
+      {
+          "name": "Hospital",
+          "description": "A healthcare facility",
+          "properties": ["name", "location"]
+      },
+      {
+          "name": "Manufacturer",
+          "description": "A company that produces medications",
+          "properties": ["name", "location"]
+      }
   ],
   "relation_types": [
-    {
-      "name": "HAS_CONDITION",
-      "description": "Patient has a medical condition",
-      "source_types": [
-        "Patient"
-      ],
-      "target_types": [
-        "Condition"
-      ]
-    },
-    {
-      "name": "PRESCRIBED",
-      "description": "Doctor prescribed a medication to a patient",
-      "source_types": [
-        "Doctor"
-      ],
-      "target_types": [
-        "Prescription"
-      ]
-    },
-    {
-      "name": "PRESCRIBED_FOR",
-      "description": "Prescription is for a patient",
-      "source_types": [
-        "Prescription"
-      ],
-      "target_types": [
-        "Patient"
-      ]
-    },
-    {
-      "name": "CONTAINS",
-      "description": "Prescription contains a medication",
-      "source_types": [
-        "Prescription"
-      ],
-      "target_types": [
-        "Medication"
-      ]
-    },
-    {
-      "name": "TREATS",
-      "description": "Medication treats a condition",
-      "source_types": [
-        "Medication"
-      ],
-      "target_types": [
-        "Condition"
-      ]
-    },
-    {
-      "name": "INTERACTS_WITH",
-      "description": "Medication interacts with another medication",
-      "source_types": [
-        "Medication"
-      ],
-      "target_types": [
-        "Medication"
-      ]
-    }
+      {
+          "name": "PRESCRIBED_BY",
+          "description": "Indicates which doctor prescribed a medication",
+          "source_types": ["Prescription"],
+          "target_types": ["Doctor"]
+      },
+      {
+          "name": "PRESCRIBED_FOR",
+          "description": "Indicates which patient received a prescription",
+          "source_types": ["Prescription"],
+          "target_types": ["Patient"]
+      },
+      {
+          "name": "CONTAINS",
+          "description": "Indicates which medication is in a prescription",
+          "source_types": ["Prescription"],
+          "target_types": ["Medication"]
+      },
+      {
+          "name": "MANUFACTURED_BY",
+          "description": "Indicates which company manufactures a medication",
+          "source_types": ["Medication"],
+          "target_types": ["Manufacturer"]
+      },
+      {
+          "name": "WORKS_AT",
+          "description": "Indicates which hospital a doctor works at",
+          "source_types": ["Doctor"],
+          "target_types": ["Hospital"]
+      },
+      {
+          "name": "TREATS",
+          "description": "Indicates which patient a doctor treats",
+          "source_types": ["Doctor"],
+          "target_types": ["Patient"]
+      },
+      {
+          "name": "SAME_AS",
+          "description": "Indicates that two entities refer to the same real-world entity",
+          "source_types": [],
+          "target_types": []
+      }
   ]
 }

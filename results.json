@@ -1,20 +1,40 @@
 {
+  "start_time": "2025-04-16T09:00:05.967250",
   "csv_files_processed": 4,
   "pdf_files_processed": 2,
-  "entities_created": 89,
-  "relationships_created": 12433,
-  "start_time": "2025-04-13T17:06:03.347140",
-  "end_time": "2025-04-13T18:09:39.526305",
+  "entities_created": 48,
+  "entities_merged": 34,
+  "relationships_created": 0,
+  "csv": {
+    "rows_processed": 21,
+    "relationships_created": 6
+  },
+  "pdf": {
+    "chunks_processed": 2,
+    "entities_extracted": 22,
+    "relationships_extracted": 0,
+    "relationships_created": 2
+  },
+  "cross_ref": {
+    "name_based_rels_created": 0,
+    "vector_based_rels_created": 0
+  },
+  "end_time": "2025-04-16T09:00:52.184551",
   "entity_resolution": {
-    "exact_matches": 2199,
+    "total_calls": 65,
+    "id_matches": 7,
+    "exact_matches": 10,
     "fuzzy_matches": 0,
-    "vector_matches": 1143,
-    "llm_resolved": 1,
-    "new_entities": 89
+    "vector_matches": 0,
+    "llm_resolved": 0,
+    "new_entities": 48,
+    "merged_entities": 34,
+    "errors": 0
   },
   "pending_schema_changes": {
-    "entity_types": 19,
-    "relation_types": 43
+    "pending_entity_types": 0,
+    "pending_relation_types": 2
   },
-  "processing_time_seconds": 3820.571516275406
+  "total_relationships_created": 8,
+  "processing_time_seconds": 50.61
 }

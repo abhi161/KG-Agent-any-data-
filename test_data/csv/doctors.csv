@@ -1,31 +1,6 @@
-doctor_id,title,first_name,last_name,full_name,specialty,hospital,years_of_experience
-DOC0001,Dr.,Sarah,Johnson,Dr. Sarah Johnson,Pediatrics,General Hospital,9
-DOC0002,Dr.,Michael,Chen,Dr. Michael Chen,Dermatology,Memorial Hospital,18
-DOC0003,Dr.,Elizabeth,Taylor,Dr. Elizabeth Taylor,Pediatrics,St. Mary's,31
-DOC0004,Dr.,David,Rodriguez,Dr. David Rodriguez,Gastroenterology,Memorial Hospital,14
-DOC0005,Dr.,Emily,Wilson,Dr. Emily Wilson,Nephrology,General Hospital,10
-DOC0006,Dr.,Robert,Brown,Dr. Robert Brown,Cardiology,Community Health Center,11
-DOC0007,Dr.,Jennifer,Miller,Dr. Jennifer Miller,Oncology,Regional Medical Center,27
-DOC0008,Dr.,William,Davis,Dr. William Davis,Cardiology,Memorial Hospital,28
-DOC0009,Dr.,Amanda,Garcia,Dr. Amanda Garcia,Radiology,Regional Medical Center,26
-DOC0010,Dr.,Thomas,Martinez,Dr. Thomas Martinez,Psychiatry,Regional Medical Center,11
-DOC0011,Dr.,Sophia,Smith,Dr. Sophia Smith,Psychiatry,City Hospital,23
-DOC0012,Dr.,James,Anderson,Dr. James Anderson,Gastroenterology,General Hospital,22
-DOC0013,Dr.,Olivia,Jackson,Dr. Olivia Jackson,Cardiology,City Hospital,22
-DOC0014,Dr.,Richard,Thompson,Dr. Richard Thompson,Dermatology,City Hospital,32
-DOC0015,Dr.,Emma,White,Dr. Emma White,Endocrinology,St. Mary's,15
-DOC0016,Dr.,John,Harris,Dr. John Harris,Orthopedics,University Medical Center,25
-DOC0017,Dr.,Anna,Martin,Dr. Anna Martin,Endocrinology,University Medical Center,11
-DOC0018,Dr.,Steven,Jones,Dr. Steven Jones,Dermatology,University Medical Center,28
-DOC0019,Dr.,Maria,Williams,Dr. Maria Williams,Pediatrics,City Hospital,26
-DOC0020,Dr.,Daniel,Lee,Dr. Daniel Lee,Internal Medicine,University Medical Center,15
-DOC0021,Dr.,Jessica,Walker,Dr. Jessica Walker,Oncology,General Hospital,21
-DOC0022,Dr.,Charles,Hall,Dr. Charles Hall,Oncology,University Medical Center,25
-DOC0023,Dr.,Margaret,Allen,Dr. Margaret Allen,Pediatrics,Memorial Hospital,7
-DOC0024,Dr.,Christopher,Young,Dr. Christopher Young,Psychiatry,General Hospital,6
-DOC0025,Dr.,Lisa,King,Dr. Lisa King,Endocrinology,Regional Medical Center,15
-DOC0026,Dr.,Sarah,Johnson,Dr. Sarah Johnson,Pediatrics,St. Mary's,31
-DOC0027,Dr.,Michael,Chen,Dr. Michael Chen,Pediatrics,City Hospital,4
-DOC0028,Dr.,Elizabeth,Taylor,Dr. Elizabeth Taylor,Internal Medicine,University Medical Center,21
-DOC0029,Dr.,David,Rodriguez,Dr. David Rodriguez,Neurology,University Medical Center,26
-DOC0030,Dr.,Emily,Wilson,Dr. Emily Wilson,Neurology,General Hospital,27
+doctor_id,name,specialty,hospital
+D001,Dr. Emily Wong,Cardiology,Central Hospital
+D002,Dr. James Miller,Neurology,University Medical Center
+D003,Dr. Amelia Patel,Endocrinology,Central Hospital
+D004,Dr. Michael Stevens,Pulmonology,Riverside Clinic
+D005,Dr. E. Wong,Cardiology,Memorial Hospital

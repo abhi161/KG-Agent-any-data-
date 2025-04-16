@@ -1,51 +1,6 @@
-medication_id,medication_name,category,manufacturer,approval_year
-MED00001,Lisinopril,Antihypertensive,Gilead Sciences,2003
-MED00002,Metformin,Antidiabetic,AstraZeneca,1994
-MED00003,Atorvastatin,Statin,Roche,1992
-MED00004,Levothyroxine,Thyroid Medication,GlaxoSmithKline,2008
-MED00005,Amlodipine,Calcium Channel Blocker,Novartis,1990
-MED00006,Metoprolol,Beta Blocker,Sanofi,2011
-MED00007,Omeprazole,Proton Pump Inhibitor,Merck,1997
-MED00008,Simvastatin,Statin,Gilead Sciences,1983
-MED00009,Losartan,Antihypertensive,AstraZeneca,2007
-MED00010,Gabapentin,Anticonvulsant,Novartis,2011
-MED00011,Hydrochlorothiazide,Diuretic,Pfizer,1989
-MED00012,Sertraline,SSRI,GlaxoSmithKline,1993
-MED00013,Montelukast,Asthma Medication,Sanofi,2003
-MED00014,Pantoprazole,Proton Pump Inhibitor,Bristol-Myers Squibb,1986
-MED00015,Escitalopram,SSRI,AstraZeneca,2002
-MED00016,Acetaminophen,Analgesic,Amgen,2011
-MED00017,Ibuprofen,NSAID,Pfizer,2006
-MED00018,Aspirin,Antiplatelet,Merck,2007
-MED00019,Fluoxetine,SSRI,GlaxoSmithKline,2006
-MED00020,Fluticasone,Corticosteroid,Merck,2016
-MED00021,Albuterol,Bronchodilator,AstraZeneca,2016
-MED00022,Prednisone,Corticosteroid,Johnson & Johnson,2010
-MED00023,Tramadol,Antihypertensive,AbbVie,2000
-MED00024,Furosemide,Antidiabetic,AbbVie,2018
-MED00025,Azithromycin,Statin,Roche,2003
-MED00026,Rosuvastatin,Thyroid Medication,GlaxoSmithKline,1986
-MED00027,Carvedilol,Calcium Channel Blocker,Gilead Sciences,1983
-MED00028,Duloxetine,Beta Blocker,Johnson & Johnson,1989
-MED00029,Citalopram,Proton Pump Inhibitor,Bristol-Myers Squibb,1993
-MED00030,Warfarin,Statin,Pfizer,1988
-MED00031,Clopidogrel,Antihypertensive,Gilead Sciences,1994
-MED00032,Clonazepam,Anticonvulsant,AbbVie,2015
-MED00033,Meloxicam,Diuretic,GlaxoSmithKline,2013
-MED00034,Hydrocodone,SSRI,AstraZeneca,1981
-MED00035,Venlafaxine,Asthma Medication,AbbVie,1997
-MED00036,Amoxicillin,Proton Pump Inhibitor,Merck,2009
-MED00037,Alprazolam,SSRI,Gilead Sciences,1984
-MED00038,Bupropion,Analgesic,Pfizer,1985
-MED00039,Ciprofloxacin,NSAID,Gilead Sciences,1997
-MED00040,Trazodone,Antiplatelet,Merck,1997
-MED00041,Oxycodone,SSRI,GlaxoSmithKline,2011
-MED00042,Lorazepam,Corticosteroid,Novartis,1981
-MED00043,Cyclobenzaprine,Bronchodilator,GlaxoSmithKline,2004
-MED00044,Pravastatin,Corticosteroid,Bristol-Myers Squibb,1982
-MED00045,Methylprednisolone,Antihypertensive,Novartis,1985
-MED00046,Diazepam,Antidiabetic,Amgen,1989
-MED00047,Lyrica,Statin,Bristol-Myers Squibb,1987
-MED00048,Xyzal,Thyroid Medication,Merck,2001
-MED00049,Vyvanse,Calcium Channel Blocker,Johnson & Johnson,2002
-MED00050,Januvia,Beta Blocker,Novartis,1985
+med_id,brand_name,generic_name,classification,manufacturer
+M001,Tenormin,Atenolol,Beta Blocker,AstraZeneca
+M002,Advil,Ibuprofen,NSAID,Pfizer
+M003,Glucophage,Metformin,Antidiabetic,Merck
+M004,Proventil,Albuterol,Bronchodilator,Schering-Plough
+M005,Tylenol,Acetaminophen,Analgesic,Johnson & Johnson

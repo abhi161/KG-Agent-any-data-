@@ -33,7 +33,8 @@ class Config:
         self.neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
         self.neo4j_user = os.getenv("NEO4J_USER", "neo4j")
         self.neo4j_password = os.getenv("NEO4J_PASSWORD", "12345678")
-        
+        self.neo4j_database = os.getenv("NEO4J_DATABASE", "neo4j") # Default to 'neo4j' if not set
+
         # Vector settings
         self.vector_enabled = os.getenv("VECTOR_ENABLED", "true").lower() == "true"
         self.vector_similarity_threshold = float(os.getenv("VECTOR_SIMILARITY_THRESHOLD", "0.75"))
@@ -129,7 +130,8 @@ class Config:
         return {
             "uri": self.neo4j_uri,
             "user": self.neo4j_user,
-            "password": self.neo4j_password
+            "password": self.neo4j_password,
+            "database": self.neo4j_database
         }
     
     def update_from_dict(self, config_dict: Dict[str, Any]) -> None:

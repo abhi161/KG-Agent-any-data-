@@ -1,0 +1,20 @@
+{
+  "csv_files_processed": 0,
+  "pdf_files_processed": 0,
+  "entities_created": 0,
+  "relationships_created": 0,
+  "start_time": "2025-04-15T20:34:08.707879",
+  "end_time": "2025-04-15T20:34:08.709895",
+  "entity_resolution": {
+    "exact_matches": 0,
+    "fuzzy_matches": 0,
+    "vector_matches": 0,
+    "llm_resolved": 0,
+    "new_entities": 0
+  },
+  "pending_schema_changes": {
+    "entity_types": 0,
+    "relation_types": 0
+  },
+  "processing_time_seconds": 4.279195070266724
+}
