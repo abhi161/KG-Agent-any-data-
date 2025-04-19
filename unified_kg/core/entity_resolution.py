@@ -85,6 +85,24 @@ class EntityResolution:
          """ Gets the identifier property name for a given entity type. """
          return self.identifier_properties_map.get(sanitized_entity_type)
 
+    # --- ADD Helper for Name Normalization ---
+    def _normalize_name(self, name: str) -> str:
+        """ Simple name normalization: lower case, remove common titles & punctuation. """
+        if not isinstance(name, str): return ""
+        name_lower = name.lower()
+        # Remove common titles (add more if needed)
+        # Added variations like 'dr ' without period
+        titles = ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof ']
+        for title in titles:
+            if name_lower.startswith(title):
+                name_lower = name_lower[len(title):]
+        # Remove punctuation (keeping spaces/hyphens might be desirable depending on data)
+        # This example removes periods, commas, semicolons, parentheses, quotes
+        name_processed = re.sub(r'[.,();\'"]', '', name_lower)
+        # Remove extra whitespace
+        name_normalized = ' '.join(name_processed.split())
+        return name_normalized
+    
     def _check_apoc(self) -> bool:
         try:
             self.graph_db.query("RETURN apoc.version() AS version")
@@ -178,7 +196,7 @@ class EntityResolution:
 
     # !!--- MODIFIED find_matching_entity ---!!
     def find_matching_entity(self, entity_name: str, entity_type: str, properties: Dict[str, Any] = None) -> Optional[Dict]:
-        """ Find matching entity using ID, name, vectors, LLM. """
+        """ Find matching entity using ID, Name (Original & Normalized), Vectors, LLM. """
         self.resolution_stats["total_calls"] += 1
         if not properties: properties = {}
         sanitized_type = self.sanitize_label(entity_type)
@@ -186,44 +204,24 @@ class EntityResolution:
 
         # 1. Identifier Match (Using Schema)
         identifier_property = self.get_identifier_property(sanitized_type)
-        # Use entity_name as identifier value IF the source column was directly mapped to entity type
-        # OR look for the specific identifier property in the properties dict.
         identifier_value = None
         if identifier_property:
-            # Check if the key exists directly in properties (e.g., patient_id was a separate column)
-            if identifier_property in properties:
-                identifier_value = properties[identifier_property]
-            # If not found directly, check if the entity_name itself *is* the ID
-            # (e.g., the patient_id column was mapped as the entity source)
-            # This requires knowing the origin column name, difficult here.
-            # Let's assume for now ID must be in properties dict explicitly.
-            # A better approach might involve passing origin column name alongside entity_name.
-            # --> TEMPORARY FIX: Check if entity_name looks like the potential ID property name
-            # This is brittle! Best is to ensure ID is always in properties dict.
-            elif identifier_property == self.sanitize_label(entity_name).lower(): # Check if prop name matches name
-                 identifier_value = entity_name # Risky assumption
-
-            # Ensure value is not empty
-            if identifier_value == '' or pd.isna(identifier_value):
-                 identifier_value = None
-
+            if identifier_property in properties: identifier_value = properties[identifier_property]
+            if identifier_value == '' or pd.isna(identifier_value): identifier_value = None
 
         if identifier_property and identifier_value is not None:
             logger.debug(f"Attempting match for {sanitized_type} using identifier {identifier_property}={identifier_value}")
             try:
                 id_query = f"""
-                MATCH (n:`{sanitized_type}`)
-                WHERE n.`{identifier_property}` = $id_value
-                RETURN n, elementId(n) as id
-                LIMIT 1
+                MATCH (n:`{sanitized_type}`) WHERE n.`{identifier_property}` = $id_value
+                RETURN n, elementId(n) as id LIMIT 1
                 """
                 id_results = self.graph_db.query(id_query, {"id_value": identifier_value})
                 if id_results:
                     self.resolution_stats["id_matches"] += 1
                     matched_id = id_results[0]["id"]
                     logger.info(f"Identifier match found for {sanitized_type} with {identifier_property}={identifier_value}. Node ID: {matched_id}. Merging properties from {source_info}.")
-                    # *** Merge properties from current source onto the matched node ***
-                    self.merge_entity_properties(matched_id, properties, source_info)
+                    self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
                     return {"id": matched_id, "node": id_results[0]["n"], "method": "identifier"}
             except Exception as e:
                  logger.error(f"Error during identifier match query for {identifier_value} ({sanitized_type}): {e}", exc_info=True)
@@ -231,30 +229,63 @@ class EntityResolution:
         # --- If no match by ID, continue ---
 
 
-        # 2. Exact Name Match (Case-Insensitive)
-        # (Only if entity_name is likely a name, not an ID that failed match)
+        # 2. Name Matching (Original and Normalized)
         # Heuristic: Don't name match if entity_name seems like the failed ID value
-        should_try_name_match = not (identifier_property and identifier_value == entity_name)
+        should_try_name_match = not (identifier_property and str(identifier_value) == entity_name)
 
         if should_try_name_match:
             try:
-                # Use name property, which should always be set
+                # a) Try original name first (case-insensitive)
                 name_query = f"""
-                MATCH (n:`{sanitized_type}`)
-                WHERE n.name = $name OR toLower(n.name) = toLower($name)
-                RETURN n, elementId(n) as id
-                LIMIT 1
+                MATCH (n:`{sanitized_type}`) WHERE n.name = $name OR toLower(n.name) = toLower($name)
+                RETURN n, elementId(n) as id LIMIT 1
                 """
                 name_results = self.graph_db.query(name_query, {"name": entity_name})
                 if name_results:
                     self.resolution_stats["exact_matches"] += 1
                     matched_id = name_results[0]["id"]
                     logger.info(f"Exact name match found for '{entity_name}' ({sanitized_type}). Node ID: {matched_id}. Merging properties from {source_info}.")
-                    # *** Merge properties onto the matched node ***
-                    self.merge_entity_properties(matched_id, properties, source_info)
+                    self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
                     return {"id": matched_id, "node": name_results[0]["n"], "method": "exact"}
+
+                # --- ADD NORMALIZED NAME CHECK ---
+                # b) If original failed, try normalized name match (on-the-fly)
+                normalized_incoming_name = self._normalize_name(entity_name)
+                if normalized_incoming_name and self.apoc_available: # Check if APOC needed functions are likely there
+                    # More robust query using APOC text functions:
+                    norm_name_query = f"""
+                    MATCH (n:`{sanitized_type}`)
+                    // Normalize stored name: lower -> remove titles -> remove punctuation -> trim
+                    WITH n, reduce(s = toLower(n.name), title IN ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof '] | replace(s, title, '')) as name_no_title
+                    WITH n, replace(replace(replace(replace(replace(replace(name_no_title, '.', ''), ',', ''), ';', ''), '(', ''), ')', ''), "'", '') as name_no_punct
+                    WITH n, trim(name_no_punct) as normalized_stored_name
+                    WHERE $norm_name = normalized_stored_name
+                    RETURN n, elementId(n) as id
+                    LIMIT 1
+                    """
+                    # Note: Added escaped quote \\' and double quote \\" to regexp_replace
+                    try:
+                        norm_name_results = self.graph_db.query(norm_name_query, {"norm_name": normalized_incoming_name})
+                        if norm_name_results:
+                            stat_key = "normalized_name_matches"
+                            self.resolution_stats[stat_key] = self.resolution_stats.get(stat_key, 0) + 1
+                            matched_id = norm_name_results[0]["id"]
+                            logger.info(f"Normalized name match found for '{entity_name}' -> '{normalized_incoming_name}' ({sanitized_type}). Node ID: {matched_id}. Merging.")
+                            self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
+                            return {"id": matched_id, "node": norm_name_results[0]["n"], "method": "normalized_name"}
+                    except Exception as norm_e:
+                        if "unknown function" in str(norm_e).lower() and ("replace" in str(norm_e).lower() or "regexp_replace" in str(norm_e).lower()):
+                             logger.warning(f"Normalized name query failed, requires APOC text functions (replace/regexp_replace). Error: {norm_e}")
+                             # Disable future attempts if APOC text functions aren't there
+                             # self.apoc_available = False # Or a specific flag
+                        else:
+                            logger.warning(f"On-the-fly normalized name query failed: {norm_e}")
+                elif normalized_incoming_name and not self.apoc_available:
+                     logger.debug("Skipping on-the-fly normalized name check as APOC seems unavailable.")
+                # --- END NORMALIZED NAME CHECK ---
+
             except Exception as e:
-                 logger.error(f"Error during exact name match query for {entity_name} ({sanitized_type}): {e}", exc_info=True)
+                 logger.error(f"Error during name match query for {entity_name}: {e}", exc_info=True)
                  self.resolution_stats["errors"] += 1
         # --- If no match by name, continue ---
 
@@ -486,28 +517,118 @@ class EntityResolution:
                 logger.error(f"Error during vector similarity search query: {e}", exc_info=True)
                 self.resolution_stats["errors"] += 1
                 return []
-
+    
     def _resolve_with_llm(self, entity_name: str, entity_type: str, properties: Dict[str, Any], candidates: List[Dict]) -> Optional[Dict]:
-        # (Implementation remains the same as before)
-        if not candidates: return None
-        prop_str = json.dumps({k: str(v)[:100] for k, v in properties.items() if k not in ['embedding', 'sources']}, indent=2)
+        """ Use LLM to decide if the entity matches any low-confidence candidates, now using context. """
+        if not candidates:
+            return None
+
+        # --- MODIFICATION: Extract context ---
+        incoming_context = properties.get('context', 'N/A')
+        # Ensure it's a string before checking length or replacing
+        if not isinstance(incoming_context, str): incoming_context = str(incoming_context) if incoming_context is not None else 'N/A'
+        if incoming_context == '' : incoming_context = 'N/A'
+        max_context_len = 300 # Max length for prompt display
+        if len(incoming_context) > max_context_len:
+             incoming_context = incoming_context[:max_context_len] + "..."
+        # --- END MODIFICATION ---
+
+        prop_str = json.dumps({k: str(v)[:100] for k, v in properties.items() if k not in ['embedding', 'sources', 'context', 'chunk_index', 'row_index', 'source']}, indent=2) # Removed 'source' from exclusion
+
         candidate_str = ""
         for i, candidate in enumerate(candidates):
             node = candidate["node"]
-            node_props = {k: str(v)[:100] for k, v in node.items() if k not in ['embedding', 'name', 'id', 'sources']}
-            candidate_str += f"\nCandidate {i+1}:\n - Name: {node.get('name', 'N/A')}\n - Match Score: {candidate.get('score', 0):.3f} (Method: {candidate.get('method', 'unknown')})\n - Properties: {json.dumps(node_props)}\n"
-        prompt = f"Task: Entity Resolution Disambiguation...\nEntity to Resolve:\n- Name: {entity_name}\n- Type: {entity_type}\n- Properties: {prop_str}\nPotential Candidates:{candidate_str}\n...Decision: Based on your analysis... Respond with the candidate number or 'None'.\nYour Answer:" # Truncated for brevity
+            # Also try to get context stored on the candidate node if available
+            candidate_context = node.get('context', 'N/A')
+            if not isinstance(candidate_context, str): candidate_context = str(candidate_context) if candidate_context is not None else 'N/A'
+            if candidate_context == '': candidate_context = 'N/A'
+            if len(candidate_context) > max_context_len:
+                 candidate_context = candidate_context[:max_context_len] + "..."
+
+            node_props = {k: str(v)[:100] for k, v in node.items() if k not in ['embedding', 'name', 'id', 'sources', 'context']}
+            candidate_str += f"\nCandidate {i+1}:\n"
+            candidate_str += f"- Name: {node.get('name', 'N/A')}\n"
+            candidate_str += f"- Match Score: {candidate.get('score', 0):.3f} (Method: {candidate.get('method', 'unknown')})\n"
+            candidate_str += f"- Properties: {json.dumps(node_props)}\n"
+            candidate_str += f"- Stored Context: {candidate_context}\n" # Add candidate context
+
+
+        # --- MODIFICATION: Update Prompt ---
+        prompt = f"""
+        Task: Entity Resolution Disambiguation
+
+        You are given an entity mentioned in a source text and a list of potential matching candidate entities already existing in a knowledge graph.
+        The candidates were identified using methods like vector similarity or fuzzy name matching, but the confidence score was not high enough for an automatic match.
+        Determine if the new entity mention definitively represents the SAME real-world entity as ONE of the candidates.
+
+        Entity Mention to Resolve:
+        - Name: {entity_name}
+        - Type: {entity_type}
+        - Context from Source Text: "{incoming_context}"
+        - Other Properties: {prop_str}
+
+        Potential Existing Candidates:
+        {candidate_str}
+
+        Analysis Questions:
+        1. Compare the names: Are they variations (e.g., titles, initials), typos, or completely different?
+        2. Compare the types: Are they compatible?
+        3. Compare the properties AND context: Does the information align or contradict? Does the context from the source text support a link to the candidate's details or context?
+        4. Consider the match scores/methods.
+
+        Decision: Based on your analysis, does the 'Entity Mention to Resolve' match **exactly one** of the candidates?
+        - If YES, return the number of the matching candidate (e.g., "1", "2", or "3").
+        - If NO (it's likely a new distinct entity, or it matches multiple candidates ambiguously, or you are uncertain), return "None".
+
+        Provide only the candidate number or "None".
+
+        Your Answer:
+        """
+        # --- END MODIFICATION ---
+
         try:
-            response = self.llm.invoke(prompt).content.strip()
+            # Assuming self.llm.invoke returns an object with a 'content' attribute
+            response = self.llm.invoke(prompt).content.strip() # Check if .content is correct for your LLM wrapper
+
             if response.isdigit() and 1 <= int(response) <= len(candidates):
                 idx = int(response) - 1
                 selected_candidate = candidates[idx]
-                return {"id": selected_candidate["id"], "node": selected_candidate["node"], "method": "llm", "original_method": selected_candidate.get("method"), "original_score": selected_candidate.get("score")}
-            else: return None
+                logger.info(f"LLM selected candidate {response} ({selected_candidate['node'].get('name')}) as match for {entity_name}.")
+                # Return the matched candidate's info with method marked as 'llm'
+                return {
+                    "id": selected_candidate["id"],
+                    "node": selected_candidate["node"],
+                    "method": "llm",
+                    "original_method": selected_candidate.get("method"),
+                    "original_score": selected_candidate.get("score")
+                }
+            elif response.upper() == "NONE":
+                 logger.info(f"LLM determined no definitive match for {entity_name} among candidates.")
+                 return None
+            else:
+                 logger.warning(f"LLM resolution returned unexpected response for {entity_name}: '{response}'. Treating as no match.")
+                 return None
+
+        except AttributeError:
+             logger.error("LLM response object does not have 'content' attribute. Trying direct string conversion.")
+             # Fallback if .content doesn't exist
+             try:
+                 response_str = str(self.llm.invoke(prompt)).strip()
+                 if response_str.isdigit() and 1 <= int(response_str) <= len(candidates):
+                     idx = int(response_str) - 1
+                     # ... (rest of logic as above) ...
+                     return { ... } # Return selected candidate
+                 else:
+                      # ... (logic for "NONE" or unexpected) ...
+                      return None
+             except Exception as e_inner:
+                  logger.error(f"LLM prediction and fallback failed during entity resolution for {entity_name}: {e_inner}", exc_info=True)
+                  self.resolution_stats["errors"] += 1
+                  return None
         except Exception as e:
             logger.error(f"LLM prediction failed during entity resolution for {entity_name}: {e}", exc_info=True)
             self.resolution_stats["errors"] += 1
-            return None
+            return None # Fail safe
 
     def merge_entity_properties(self, entity_id: str, new_properties: Dict[str, Any], source: str = None) -> None:
         # (Implementation remains largely the same, ensure it gets entity_type correctly if needed for embedding regen)

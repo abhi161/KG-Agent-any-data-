@@ -553,10 +553,10 @@ class LLMEnhancedKnowledgeGraph:
 
             # 5. Optional: Cross-reference entities WITHIN the PDF (e.g., co-occurrence)
             # This can be complex; simple co-occurrence example:
-            logger.info("Performing intra-PDF entity cross-referencing...")
-            intra_pdf_rels = self._cross_reference_pdf_entities(all_chunk_entities, file_basename)
-            pdf_stats["relationships_created"] += intra_pdf_rels # Add count of co-occurrence rels
-            logger.info(f"Created {intra_pdf_rels} intra-PDF relationships (e.g., co-occurrence).")
+            # logger.info("Performing intra-PDF entity cross-referencing...")
+            # intra_pdf_rels = self._cross_reference_pdf_entities(all_chunk_entities, file_basename)
+            # pdf_stats["relationships_created"] += intra_pdf_rels # Add count of co-occurrence rels
+            # logger.info(f"Created {intra_pdf_rels} intra-PDF relationships (e.g., co-occurrence).")
 
 
             # Update global stats
