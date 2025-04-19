@@ -17,11 +17,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser, OutputFixingParser
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from langchain.chains import LLMChain
 from langchain.llms.base import BaseLLM # Using base class for type hint
 from langchain.embeddings.base import Embeddings # Using base class for type hint
-
+from .schema_manager import SchemaManager
 logger = logging.getLogger(__name__)
 
 # --- Pydantic Models (Unchanged) ---
@@ -31,7 +31,7 @@ class Entity(BaseModel):
     attributes: Dict[str, Any] = Field(default_factory=dict, description="Key attributes or properties of the entity mentioned (e.g., dosage for a drug, symptom for a disease)")
     context: Optional[str] = Field(default=None, description="The sentence or short phrase where the entity was mentioned, providing context")
 
-    @validator('name', 'type')
+    @field_validator('name', 'type')
     def must_not_be_empty(cls, v):
         if not v or not v.strip():
             raise ValueError("Name and type must not be empty")
@@ -43,7 +43,7 @@ class Relation(BaseModel):
     target: str = Field(description="The name of the target entity in the relationship")
     context: Optional[str] = Field(default=None, description="The sentence or short phrase where the relationship was mentioned")
 
-    @validator('source', 'relation', 'target')
+    @field_validator('source', 'relation', 'target')
     def must_not_be_empty(cls, v):
         if not v or not v.strip():
             raise ValueError("Source, relation, and target must not be empty")
@@ -67,9 +67,10 @@ class ColumnMappingsOutput(BaseModel):
 class DataProcessor:
     """ Processor for structured (CSV) and unstructured (PDF/Text) data. """
 
-    def __init__(self, llm: BaseLLM, embeddings: Optional[Embeddings] = None, chunk_size=1000, chunk_overlap=150):
+    def __init__(self, llm: BaseLLM,schema_manager: SchemaManager,  embeddings: Optional[Embeddings] = None, chunk_size=1000, chunk_overlap=150):
         self.llm = llm
         self.embeddings = embeddings
+        self.schema_manager = schema_manager
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -84,13 +85,19 @@ class DataProcessor:
         # Entity Extraction Chain
         entity_parser = PydanticOutputParser(pydantic_object=EntitiesOutput)
         entity_prompt = PromptTemplate(
-            template="""Extract key entities from the text below. Focus on specific names and classify them into relevant types like Person, Organization, Location, Drug, Disease, Brand Name, Chemical Compound, etc. For each entity, provide its name, type, any key attributes mentioned directly with it, and the sentence where it appears.
+            template="""Extract key entities from the text below. For each entity, provide its name and any key attributes mentioned.
+            **Crucially, map the entity to the MOST specific existing entity type from the schema provided below.**
+            If no existing type accurately represents the entity, you may propose a concise, new type.
+            Also provide the sentence where the entity appears as context.
 
-Text:
-{text}
+            Available Schema Entity Types:
+            {schema_definition}
 
-{format_instructions}""",
-            input_variables=["text"],
+            Text:
+            {text}
+
+            {format_instructions}""",
+            input_variables=["text", "schema_definition"], # Added schema_definition
             partial_variables={"format_instructions": entity_parser.get_format_instructions()}
         )
         self.entity_chain = LLMChain(llm=llm, prompt=entity_prompt)
@@ -119,15 +126,21 @@ Entities Found (Name - Type):
         # Column Type Inference Chain
         column_parser = PydanticOutputParser(pydantic_object=ColumnMappingsOutput)
         column_prompt = PromptTemplate(
-            template="""Analyze the following CSV column names and sample data to determine the primary *entity type* each column represents. If a column seems to represent a distinct real-world concept (like a person, product, company, location, medical record), assign an appropriate entity type (e.g., Patient, Drug, Manufacturer, Hospital, Prescription). If the column represents a simple attribute, measurement, date, or identifier that doesn't stand alone as an entity, classify it as 'Attribute'.
+            template="""Analyze the following CSV column names and sample data.
+            For each column, determine if it primarily represents instances of an **existing entity type** from the schema provided below.
+            If it matches an existing type (e.g., a column of patient IDs matches 'Patient'), use that exact type name.
+            If the column represents a simple attribute, measurement, date, or identifier that doesn't map to an existing entity type, classify it as 'Attribute'.
+            Only propose a completely new entity type if absolutely necessary and no existing type fits.
 
-Column names: {column_names}
+            Available Schema Entity Types:
+            {schema_definition}
 
-Sample data (first 5 rows):
-{sample_data}
+            Column names: {column_names}
+            Sample data (first 5 rows):
+            {sample_data}
 
-{format_instructions}""",
-            input_variables=["column_names", "sample_data"],
+            {format_instructions}""",
+            input_variables=["column_names", "sample_data", "schema_definition"], # Added schema_definition
             partial_variables={"format_instructions": column_parser.get_format_instructions()}
         )
         self.column_chain = LLMChain(llm=llm, prompt=column_prompt)
@@ -217,6 +230,8 @@ Sample data (first 5 rows):
              logger.warning(f"Could not serialize sample data for LLM inference: {json_err}. Proceeding with column names only.", exc_info=True)
              # Keep sample_data_str as default "[Sample data unavailable]"
 
+        current_schema_prompt_str = self.schema_manager.get_current_schema_definition(format_for_prompt=True)
+
         # Limit prompt size if necessary (same logic as before)
         max_prompt_chars = 8000
         input_text = f"Columns: {column_names}, Sample: {sample_data_str}"
@@ -230,7 +245,8 @@ Sample data (first 5 rows):
         try:
             raw_response = self.column_chain.invoke({
                  "column_names": json.dumps(column_names),
-                 "sample_data": sample_data_str # Pass the sanitized/truncated string
+                 "sample_data": sample_data_str,
+                 "schema_definition": current_schema_prompt_str # <-- PASS SCHEMA
             })
             llm_output_text = raw_response.get('text', '')
             if not llm_output_text:
@@ -292,8 +308,11 @@ Sample data (first 5 rows):
         max_len = 12000
         truncated_text = text[:max_len]
         if len(text) > max_len: logger.warning("Text truncated for entity extraction.")
+
+        current_schema_prompt_str = self.schema_manager.get_current_schema_definition(format_for_prompt=True)
+
         try:
-            raw_response = self.entity_chain.invoke({"text": truncated_text})
+            raw_response = self.entity_chain.invoke({"text": truncated_text,"schema_definition": current_schema_prompt_str})
             llm_output_text = raw_response.get('text', '')
             if not llm_output_text: logger.error("LLM entity extraction empty."); return []
             try: parsed_result = self.entity_parser.parse(llm_output_text)

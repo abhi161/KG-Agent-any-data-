@@ -114,6 +114,7 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
         llm,
         graph,
         embeddings,  # Pass potentially None embeddings
+        schema_path =initial_schema_path,
         initial_schema=initial_schema,
         config={
             "batch_size": config_obj.batch_size,
@@ -122,6 +123,7 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
             "vector_enabled": vector_enabled_for_builder, # Use the determined status
             "vector_similarity_threshold": config_obj.vector_similarity_threshold # Pass threshold
         }
+        
     )
 
     try:

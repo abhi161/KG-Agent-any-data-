@@ -255,9 +255,10 @@ class EntityResolution:
                     # More robust query using APOC text functions:
                     norm_name_query = f"""
                     MATCH (n:`{sanitized_type}`)
-                    // Normalize stored name: lower -> remove titles -> remove punctuation -> trim
+                    // Attempt title removal with APOC replace (might fail if replace itself is missing/disabled)
                     WITH n, reduce(s = toLower(n.name), title IN ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof '] | replace(s, title, '')) as name_no_title
-                    WITH n, replace(replace(replace(replace(replace(replace(name_no_title, '.', ''), ',', ''), ';', ''), '(', ''), ')', ''), "'", '') as name_no_punct
+                    // Remove common punctuation using standard Cypher replace
+                    WITH n, replace(replace(replace(replace(replace(replace(replace(name_no_title, '.', ''), ',', ''), ';', ''), '(', ''), ')', ''), "'", ''), '"', '') as name_no_punct
                     WITH n, trim(name_no_punct) as normalized_stored_name
                     WHERE $norm_name = normalized_stored_name
                     RETURN n, elementId(n) as id
@@ -271,13 +272,13 @@ class EntityResolution:
                             self.resolution_stats[stat_key] = self.resolution_stats.get(stat_key, 0) + 1
                             matched_id = norm_name_results[0]["id"]
                             logger.info(f"Normalized name match found for '{entity_name}' -> '{normalized_incoming_name}' ({sanitized_type}). Node ID: {matched_id}. Merging.")
-                            self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
+                            self.merge_entity_properties(matched_id, properties, source_info)
                             return {"id": matched_id, "node": norm_name_results[0]["n"], "method": "normalized_name"}
                     except Exception as norm_e:
-                        if "unknown function" in str(norm_e).lower() and ("replace" in str(norm_e).lower() or "regexp_replace" in str(norm_e).lower()):
-                             logger.warning(f"Normalized name query failed, requires APOC text functions (replace/regexp_replace). Error: {norm_e}")
-                             # Disable future attempts if APOC text functions aren't there
-                             # self.apoc_available = False # Or a specific flag
+                        # Catch if APOC replace for titles failed
+                        if "unknown function 'replace'" in str(norm_e).lower():
+                             logger.warning(f"Normalized name query failed during title removal, requires APOC 'replace' function. Error: {norm_e}")
+                             # Here you might fall back to a query without title removal *at all* if necessary
                         else:
                             logger.warning(f"On-the-fly normalized name query failed: {norm_e}")
                 elif normalized_incoming_name and not self.apoc_available:

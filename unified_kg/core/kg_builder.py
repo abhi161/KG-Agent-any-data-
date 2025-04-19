@@ -19,7 +19,7 @@ class LLMEnhancedKnowledgeGraph:
     Refactored relationship creation for structured data.
     """
 
-    def __init__(self, llm, graph_db, embeddings, initial_schema: Optional[Dict[str, Any]] = None,
+    def __init__(self, llm, graph_db, embeddings,schema_path, initial_schema: Optional[Dict[str, Any]] = None,
                  config: Optional[Dict[str, Any]] = None):
         self.llm = llm
         self.graph_db = graph_db
@@ -31,6 +31,9 @@ class LLMEnhancedKnowledgeGraph:
 
         logger.info(f"KG Builder initialized. Vector support: {'Enabled' if self.vector_enabled else 'Disabled'}")
 
+        # Assuming SchemaManager is defined elsewhere and handles schema logic
+        self.schema_manager = SchemaManager(llm, graph_db, initial_schema,schema_path)
+
         # Initialize components
         self.entity_resolution = EntityResolution(
             llm=llm,
@@ -40,18 +43,18 @@ class LLMEnhancedKnowledgeGraph:
         )
         self.data_processor = DataProcessor(
             llm=llm,
+            schema_manager= self.schema_manager,
             embeddings=self.embeddings if self.vector_enabled else None,
             chunk_size=self.config.get("chunk_size", 1000),
             chunk_overlap=self.config.get("chunk_overlap", 150)
         )
-        # Assuming SchemaManager is defined elsewhere and handles schema logic
-        self.schema_manager = SchemaManager(llm, graph_db, initial_schema)
+        
 
         # Initialize schema (assuming SchemaManager handles this)
         logger.info("Initializing schema...")
         self.schema_manager.initialize_schema()
         logger.info("Schema initialized.")
-        self.schema_relation_map = self._build_schema_relation_map(initial_schema)
+        self.schema_relation_map = self._build_schema_relation_map(self.schema_manager.schema)
 
 
         # Statistics
