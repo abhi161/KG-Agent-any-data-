@@ -87,20 +87,37 @@ class EntityResolution:
 
     # --- ADD Helper for Name Normalization ---
     def _normalize_name(self, name: str) -> str:
-        """ Simple name normalization: lower case, remove common titles & punctuation. """
+        """
+        Generic name normalization that works for any entity type.
+        Handles prefixes, suffixes, abbreviations, and special characters.
+        """
         if not isinstance(name, str): return ""
+        
+        # Convert to lowercase
         name_lower = name.lower()
-        # Remove common titles (add more if needed)
-        # Added variations like 'dr ' without period
-        titles = ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof ']
-        for title in titles:
-            if name_lower.startswith(title):
-                name_lower = name_lower[len(title):]
-        # Remove punctuation (keeping spaces/hyphens might be desirable depending on data)
-        # This example removes periods, commas, semicolons, parentheses, quotes
-        name_processed = re.sub(r'[.,();\'"]', '', name_lower)
-        # Remove extra whitespace
+        
+        # Remove common prefixes (titles, designations, etc.)
+        prefixes = ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof ', 
+                    'doctor ', 'professor ', 'the ', 'inc. ', 'inc ', 'corp. ', 'corp ', 'ltd. ', 'ltd ']
+        for prefix in prefixes:
+            if name_lower.startswith(prefix):
+                name_lower = name_lower[len(prefix):]
+        
+        # Handle initial format (e.g., "E. Wong" -> "e wong")
+        name_lower = re.sub(r'([a-z])\.\s+', r'\1 ', name_lower)
+        
+        # Remove common suffixes
+        suffixes = [' inc', ' corp', ' ltd', ' llc', ' co', ' company', ' corporation', ' limited']
+        for suffix in suffixes:
+            if name_lower.endswith(suffix):
+                name_lower = name_lower[:-len(suffix)]
+        
+        # Remove punctuation but preserve meaningful separators
+        name_processed = re.sub(r'[.,();\'":!?]', '', name_lower)
+        
+        # Replace multiple spaces with single space
         name_normalized = ' '.join(name_processed.split())
+        
         return name_normalized
     
     def _check_apoc(self) -> bool:
