@@ -457,7 +457,7 @@ class EntityResolution:
         for k, v in properties.items():
              prop_key_sanitized = self.sanitize_label(k).lower()
              # Exclude keys already handled or special keys
-             if prop_key_sanitized not in [merge_property, 'name', 'id', 'embedding', 'sources', 'unique_hash', 'normalized_name', identifier_property]:
+             if prop_key_sanitized not in [merge_property, 'id', 'embedding', 'sources', 'unique_hash', 'normalized_name', identifier_property]:
                  if isinstance(v, (int, float, bool, str)): create_props[prop_key_sanitized] = v
                  elif pd.isna(v): create_props[prop_key_sanitized] = None
                  else: create_props[prop_key_sanitized] = str(v) # Convert others
