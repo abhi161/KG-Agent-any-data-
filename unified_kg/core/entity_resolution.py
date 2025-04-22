@@ -1,4 +1,4 @@
-# --- core/entity_resolution.py (MODIFIED) ---
+# --- core/entity_resolution.py ---
 import logging
 import json
 import re
@@ -30,10 +30,10 @@ class EntityResolution:
         self.graph_db = graph_db
         self.embeddings = embeddings
         self.config = config or {}
-        self.initial_schema = self.config.get('initial_schema', {}) # Get schema from config
+        self.initial_schema = self.config.get('initial_schema', {}) 
         self.vector_enabled = self.embeddings is not None and self.config.get('vector_enabled', False)
         self.similarity_threshold = self.config.get('vector_similarity_threshold', 0.85)
-        self.fuzzy_similarity_threshold = self.config.get('fuzzy_similarity_threshold', 0.85)
+        self.fuzzy_similarity_threshold = self.config.get('fuzzy_similarity_threshold', 0.6)
         self.apoc_available = self._check_apoc()
 
         # Build identifier map from schema
@@ -43,7 +43,7 @@ class EntityResolution:
 
         self.resolution_stats = {
             "total_calls": 0,
-            "id_matches": 0, # New category
+            "id_matches": 0, 
             "exact_matches": 0,
             "fuzzy_matches": 0,
             "vector_matches": 0,
@@ -54,7 +54,6 @@ class EntityResolution:
         }
 
         if self.vector_enabled:
-            # Pass embedding dimension if available in config, else default
             embedding_dimension = self.config.get('embedding_dimension', 1536)
             self._initialize_vector_index(embedding_dimension)
         else:
@@ -70,6 +69,7 @@ class EntityResolution:
 
     def _build_identifier_map(self, schema: Dict) -> Dict[str, str]:
         """ Creates a map of {sanitized_entity_type: identifier_property_name}. """
+
         id_map = {}
         if schema and "entity_types" in schema:
             for et_def in schema["entity_types"]:
@@ -77,7 +77,6 @@ class EntityResolution:
                 id_prop = et_def.get("identifier_property")
                 if type_name and id_prop:
                     sanitized_type = self.sanitize_label(type_name)
-                    # Also sanitize the property name for consistency? Usually not needed for IDs.
                     id_map[sanitized_type] = id_prop
         return id_map
 
@@ -120,6 +119,8 @@ class EntityResolution:
         
         return name_normalized
     
+
+
     def _check_apoc(self) -> bool:
         try:
             self.graph_db.query("RETURN apoc.version() AS version")
@@ -129,23 +130,23 @@ class EntityResolution:
             logger.warning(f"APOC library not detected or query failed: {e}. Fuzzy matching will be disabled.")
             return False
 
+
+
     def _initialize_vector_index(self, embedding_dimension: int):
-        """Initialize a global vector index in Neo4j for all entity types
-        
+        """Initialize a global vector index in Neo4j for all entity types    
         Args:
             embedding_dimension: The dimension of the embedding vectors
             
         Returns:
             bool: True if index exists or was created successfully, False otherwise
         """
+
+
         index_name = 'global_embedding_index'
         
         try:
-        
-                
-            # Check if Neo4j has vector capabilities
+            # we can remove the check since we already have check in start but for safety we can consider it
             try:
-                # Try GDS version check first
                 version_query = "RETURN gds.version() AS version"
                 self.graph_db.query(version_query)
                 logger.info("Graph Data Science library detected.")
@@ -153,8 +154,10 @@ class EntityResolution:
                 logger.warning(f"GDS library check failed: {e}")
                 logger.warning("This may be fine if Neo4j has vector capabilities without GDS.")
             
-            # Create index using procedural API
+
+            # Create index using API
             logger.info(f"Attempting to create vector index '{index_name}' with dimension {embedding_dimension}...")
+
             index_query = """
             CALL db.index.vector.createNodeIndex(
                 $index_name,
@@ -187,6 +190,8 @@ class EntityResolution:
             logger.warning("Vector similarity searches will not work. Fallback methods will be used if available.")
             return False
 
+
+
     def _generate_embedding_for_entity(self, entity_name: str, entity_type: str, properties: Dict[str, Any] = None) -> Optional[List[float]]:
         # (Implementation remains the same as before)
         if not self.vector_enabled or not self.embeddings:
@@ -211,13 +216,14 @@ class EntityResolution:
             self.resolution_stats["errors"] += 1
             return None
 
-    # !!--- MODIFIED find_matching_entity ---!!
     def find_matching_entity(self, entity_name: str, entity_type: str, properties: Dict[str, Any] = None) -> Optional[Dict]:
         """ Find matching entity using ID, Name (Original & Normalized), Vectors, LLM. """
+
+
         self.resolution_stats["total_calls"] += 1
         if not properties: properties = {}
         sanitized_type = self.sanitize_label(entity_type)
-        source_info = properties.get("source", "unknown_source") # Get source for logging/merging
+        source_info = properties.get("source", "unknown_source") 
 
         # 1. Identifier Match (Using Schema)
         identifier_property = self.get_identifier_property(sanitized_type)
@@ -238,75 +244,72 @@ class EntityResolution:
                     self.resolution_stats["id_matches"] += 1
                     matched_id = id_results[0]["id"]
                     logger.info(f"Identifier match found for {sanitized_type} with {identifier_property}={identifier_value}. Node ID: {matched_id}. Merging properties from {source_info}.")
-                    self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
+                    self.merge_entity_properties(matched_id, properties, source_info) 
                     return {"id": matched_id, "node": id_results[0]["n"], "method": "identifier"}
             except Exception as e:
                  logger.error(f"Error during identifier match query for {identifier_value} ({sanitized_type}): {e}", exc_info=True)
                  self.resolution_stats["errors"] += 1
+
+
         # --- If no match by ID, continue ---
 
-
-        # 2. Name Matching (Original and Normalized)
+        # 2. Name Matching (Original and Stored Normalized)
         # Heuristic: Don't name match if entity_name seems like the failed ID value
-        should_try_name_match = not (identifier_property and str(identifier_value) == entity_name)
+        # Note: identifier_value might be None if lookup failed or wasn't attempted, handle str conversion
+        should_try_name_match = not (identifier_property and identifier_value is not None and str(identifier_value) == entity_name)
 
         if should_try_name_match:
             try:
                 # a) Try original name first (case-insensitive)
+                logger.debug(f"Attempting exact name match for '{entity_name}' ({sanitized_type})")
                 name_query = f"""
-                MATCH (n:`{sanitized_type}`) WHERE n.name = $name OR toLower(n.name) = toLower($name)
+                MATCH (n:`{sanitized_type}`)
+                WHERE n.name = $name OR toLower(n.name) = toLower($name)
                 RETURN n, elementId(n) as id LIMIT 1
                 """
                 name_results = self.graph_db.query(name_query, {"name": entity_name})
                 if name_results:
                     self.resolution_stats["exact_matches"] += 1
                     matched_id = name_results[0]["id"]
-                    logger.info(f"Exact name match found for '{entity_name}' ({sanitized_type}). Node ID: {matched_id}. Merging properties from {source_info}.")
+                    matched_node = name_results[0]["n"]
+                    logger.info(f"Exact name match found for '{entity_name}' ({sanitized_type}). Node ID: {matched_id} ('{matched_node.get('name')}'). Merging properties from {source_info}.")
                     self.merge_entity_properties(matched_id, properties, source_info) # MERGE PROPERTIES
-                    return {"id": matched_id, "node": name_results[0]["n"], "method": "exact"}
+                    return {"id": matched_id, "node": matched_node, "method": "exact"}
 
-                # --- ADD NORMALIZED NAME CHECK ---
-                # b) If original failed, try normalized name match (on-the-fly)
+                # --- Stored Normalized Name Match ---
+                # b) If exact failed, try matching the stored normalized name property
                 normalized_incoming_name = self._normalize_name(entity_name)
-                if normalized_incoming_name and self.apoc_available: # Check if APOC needed functions are likely there
-                    # More robust query using APOC text functions:
-                    norm_name_query = f"""
-                    MATCH (n:`{sanitized_type}`)
-                    // Attempt title removal with APOC replace (might fail if replace itself is missing/disabled)
-                    WITH n, reduce(s = toLower(n.name), title IN ['dr. ', 'mr. ', 'mrs. ', 'ms. ', 'prof. ', 'dr ', 'mr ', 'mrs ', 'ms ', 'prof '] | replace(s, title, '')) as name_no_title
-                    // Remove common punctuation using standard Cypher replace
-                    WITH n, replace(replace(replace(replace(replace(replace(replace(name_no_title, '.', ''), ',', ''), ';', ''), '(', ''), ')', ''), "'", ''), '"', '') as name_no_punct
-                    WITH n, trim(name_no_punct) as normalized_stored_name
-                    WHERE $norm_name = normalized_stored_name
-                    RETURN n, elementId(n) as id
-                    LIMIT 1
-                    """
-                    # Note: Added escaped quote \\' and double quote \\" to regexp_replace
+                if normalized_incoming_name: # Only proceed if normalization yields a non-empty string
+                    logger.debug(f"Attempting match for '{entity_name}' ({sanitized_type}) using stored normalized name '{normalized_incoming_name}'")
                     try:
-                        norm_name_results = self.graph_db.query(norm_name_query, {"norm_name": normalized_incoming_name})
-                        if norm_name_results:
-                            stat_key = "normalized_name_matches"
+                        # Ensure you have an index on :Doctor(normalized_name), etc.
+                        # CREATE INDEX entity_normalized_name IF NOT EXISTS FOR (n:Doctor) ON (n.normalized_name);
+                        norm_query = f"""
+                        MATCH (n:`{sanitized_type}`)
+                        WHERE n.normalized_name = $norm_name
+                        RETURN n, elementId(n) as id LIMIT 1
+                        """
+                        norm_results = self.graph_db.query(norm_query, {"norm_name": normalized_incoming_name})
+                        if norm_results:
+                            stat_key = "normalized_name_matches" # Add this to your stats keys if needed
                             self.resolution_stats[stat_key] = self.resolution_stats.get(stat_key, 0) + 1
-                            matched_id = norm_name_results[0]["id"]
-                            logger.info(f"Normalized name match found for '{entity_name}' -> '{normalized_incoming_name}' ({sanitized_type}). Node ID: {matched_id}. Merging.")
+                            matched_id = norm_results[0]["id"]
+                            matched_node = norm_results[0]["n"]
+                            logger.info(f"Stored Normalized name match found for '{entity_name}' -> '{normalized_incoming_name}' ({sanitized_type}). Node ID: {matched_id} ('{matched_node.get('name')}'). Merging properties from {source_info}.")
+                            # MERGE PROPERTIES for the found match
                             self.merge_entity_properties(matched_id, properties, source_info)
-                            return {"id": matched_id, "node": norm_name_results[0]["n"], "method": "normalized_name"}
-                    except Exception as norm_e:
-                        # Catch if APOC replace for titles failed
-                        if "unknown function 'replace'" in str(norm_e).lower():
-                             logger.warning(f"Normalized name query failed during title removal, requires APOC 'replace' function. Error: {norm_e}")
-                             # Here you might fall back to a query without title removal *at all* if necessary
-                        else:
-                            logger.warning(f"On-the-fly normalized name query failed: {norm_e}")
-                elif normalized_incoming_name and not self.apoc_available:
-                     logger.debug("Skipping on-the-fly normalized name check as APOC seems unavailable.")
-                # --- END NORMALIZED NAME CHECK ---
+                            return {"id": matched_id, "node": matched_node, "method": "normalized_name"}
+                    except Exception as e:
+                        # Log error specifically for this query type
+                        logger.error(f"Error during stored normalized name query for {normalized_incoming_name} ({sanitized_type}): {e}", exc_info=True)
+                        self.resolution_stats["errors"] += 1 # Count as error if query fails
+                # --- End Stored Normalized Name Match ---
 
             except Exception as e:
-                 logger.error(f"Error during name match query for {entity_name}: {e}", exc_info=True)
+                 # Catch potential errors from the exact match query or other issues within the block
+                 logger.error(f"Error during name matching attempts for {entity_name} ({sanitized_type}): {e}", exc_info=True)
                  self.resolution_stats["errors"] += 1
-        # --- If no match by name, continue ---
-
+        # --- If no match by name (Exact or Stored Normalized), continue ---
 
         # Prepare for other matches: Generate embedding if vectors enabled
         entity_embedding = self._generate_embedding_for_entity(entity_name, sanitized_type, properties)
@@ -364,7 +367,7 @@ class EntityResolution:
             except Exception as e:
                 logger.warning(f"Error during fuzzy matching query for {entity_name}: {e}")
 
-
+        print(f"FUCK the candidates :----------------------------------{candidates}")
         # 5. LLM-Assisted Resolution (if candidates remain)
         if candidates:
             candidates.sort(key=lambda x: x.get("score", 0), reverse=True)
@@ -388,17 +391,21 @@ class EntityResolution:
     # !!--- MODIFIED create_new_entity ---!!
     def create_new_entity(self, name: str, entity_type: str, properties: Dict[str, Any] = None,
                           source: str = None) -> Optional[str]:
-        """ Create a new entity, preferring MERGE on identifier if available, else MERGE on name. """
+        """ Create a new entity, preferring MERGE on identifier if available, else MERGE on name.
+            Prioritizes 'name' from properties dict over name argument for node's name property. Stores normalized_name."""
         sanitized_type = self.sanitize_label(entity_type)
         if not properties: properties = {}
 
         # Determine MERGE key: identifier property or name
         identifier_property = self.get_identifier_property(sanitized_type)
+        # Get potential ID value directly from properties first
         identifier_value = properties.get(identifier_property) if identifier_property else None
+        # Also consider the incoming 'name' argument IF it matches the identifier property name (less common)
+        if not identifier_value and identifier_property and name and self.sanitize_label(identifier_property).lower() == 'name':
+             identifier_value = name # If 'name' arg IS the id value
 
-        # Ensure value is not empty string or NaN if it's the identifier
         if identifier_property and (identifier_value == '' or pd.isna(identifier_value)):
-             identifier_value = None # Treat empty ID as if it wasn't provided for matching
+             identifier_value = None
 
         merge_property = None
         merge_value = None
@@ -406,102 +413,88 @@ class EntityResolution:
             merge_property = identifier_property
             merge_value = identifier_value
             logger.debug(f"Creating/Merging {sanitized_type} using identifier: {merge_property}={merge_value}")
-        elif name: # Fallback to name if ID not usable
+        # Fallback to name ONLY if identifier is not usable AND a name is provided
+        elif name:
+            # Check if a better name exists in properties before deciding to merge on name
+            name_from_props = properties.get('name') # Check the 'name' key in the properties dict
+            if name_from_props and not pd.isna(name_from_props) and name_from_props != '':
+                 merge_on_this_name = str(name_from_props)
+            else:
+                 merge_on_this_name = name # Fallback to the 'name' argument if properties['name'] is missing/empty
+
             merge_property = "name"
-            merge_value = name
+            merge_value = merge_on_this_name
             logger.debug(f"Creating/Merging {sanitized_type} using name: {merge_property}={merge_value}")
         else:
-            logger.error(f"Cannot create entity of type {sanitized_type}: Missing required identifier or name.")
+            logger.error(f"Cannot create entity of type {sanitized_type}: Missing required identifier or usable name.")
             self.resolution_stats["errors"] += 1
             return None
 
-        # Prepare properties for creation, ensuring name and ID (if used for merge) are included
-        create_props = {"name": name} # Always include name if available
-        if identifier_property and identifier_value is not None: # Ensure ID prop is set
+        # --- Determine the authoritative name for the node's 'name' property ---
+        authoritative_name = name # Default to the incoming name argument (e.g., 'D002')
+        name_from_props_val = properties.get('name') # Check the actual 'name' property passed in
+        if name_from_props_val and not pd.isna(name_from_props_val) and name_from_props_val != '':
+            # If a non-empty 'name' exists in the properties dict, STRONGLY prefer it
+            authoritative_name = str(name_from_props_val)
+            logger.debug(f"Using name '{authoritative_name}' from properties for node instead of initial argument '{name}'.")
+        elif not authoritative_name: # Handle case where name arg itself was empty/None
+             authoritative_name = f"{sanitized_type}_{identifier_value or 'Unknown'}" # Create a fallback name
+             logger.warning(f"No suitable name found for {sanitized_type} with ID '{identifier_value}'. Using generated name: '{authoritative_name}'")
+        # --- End Authoritative Name Determination ---
+
+
+        # Prepare properties for creation using the authoritative name
+        create_props = {"name": authoritative_name}
+        if identifier_property and identifier_value is not None: # Ensure ID prop is set if used for merge
              create_props[identifier_property] = identifier_value
 
-        # Add other sanitized properties
+        # Calculate normalized name based on the authoritative name
+        normalized_name = self._normalize_name(authoritative_name)
+        if normalized_name:
+            create_props["normalized_name"] = normalized_name
+
+        # Add other sanitized properties (ensure authoritative 'name' and 'normalized_name' are not overwritten)
         for k, v in properties.items():
              prop_key_sanitized = self.sanitize_label(k).lower()
-             # Avoid overwriting merge key or already set name/id
-             if prop_key_sanitized not in [merge_property, 'name', 'id', 'embedding', 'sources', 'unique_hash']:
-                 create_props[prop_key_sanitized] = v
+             # Exclude keys already handled or special keys
+             if prop_key_sanitized not in [merge_property, 'name', 'id', 'embedding', 'sources', 'unique_hash', 'normalized_name', identifier_property]:
+                 if isinstance(v, (int, float, bool, str)): create_props[prop_key_sanitized] = v
+                 elif pd.isna(v): create_props[prop_key_sanitized] = None
+                 else: create_props[prop_key_sanitized] = str(v) # Convert others
 
-        # Add unique hash anyway? Optional.
-        # create_props["unique_hash"] = hashlib.md5(f"{sanitized_type}:{merge_value}".encode()).hexdigest()
-
-        # Add source list
         if source: create_props["sources"] = [source]
 
-        # Generate embedding (if enabled) - based on combined properties
-        entity_embedding = self._generate_embedding_for_entity(name, sanitized_type, create_props)
+        entity_embedding = self._generate_embedding_for_entity(authoritative_name, sanitized_type, create_props) # Use authoritative name for embedding
         if entity_embedding:
             create_props["embedding"] = entity_embedding
 
         # Cypher MERGE query
-        # Use backticks for property name in MERGE clause
         query = f"""
         MERGE (e:`{sanitized_type}` {{`{merge_property}`: $merge_value}})
         ON CREATE SET e = $props
-        ON MATCH SET e += $props_on_match  // Add missing props on match
-        RETURN elementId(e) as id, کیس e when $props then true else false end as created // Check if props were set (crude way to check creation)
+        RETURN elementId(e) as id
         """
-        # Properties to potentially add if node already existed
-        props_on_match = create_props.copy()
-        if merge_property in props_on_match: # Don't try to re-set the merge key
-             del props_on_match[merge_property]
-        # Also handle source list merging on match
-        if source:
-             props_on_match["sources"] = f"CASE WHEN $source IN coalesce(e.sources, []) THEN e.sources ELSE coalesce(e.sources, []) + $source END"
-             # Need to handle this specially, cannot pass list directly in SET += for sources update like this
-             # Let's simplify ON MATCH for now: just ensure embedding and source list are updated
-             update_on_match_clauses = []
-             if "embedding" in create_props:
-                  update_on_match_clauses.append("e.embedding = $embedding")
-             if source:
-                  update_on_match_clauses.append("e.sources = CASE WHEN $source IN coalesce(e.sources, []) THEN e.sources ELSE coalesce(e.sources, []) + $source END")
-
-             on_match_set_clause = ", ".join(update_on_match_clauses)
-             if on_match_set_clause:
-                  query = f"""
-                  MERGE (e:`{sanitized_type}` {{`{merge_property}`: $merge_value}})
-                  ON CREATE SET e = $props
-                  ON MATCH SET {on_match_set_clause}
-                  RETURN elementId(e) as id
-                  """
-             else: # No specific ON MATCH logic needed beyond MERGE finding it
-                  query = f"""
-                  MERGE (e:`{sanitized_type}` {{`{merge_property}`: $merge_value}})
-                  ON CREATE SET e = $props
-                  RETURN elementId(e) as id
-                  """
-
-
         params = {
             "merge_value": merge_value,
-            "props": create_props,
-            "embedding": create_props.get("embedding"), # Pass separately for ON MATCH
-            "source": source # Pass separately for ON MATCH
+            "props": create_props
         }
-
 
         try:
             result = self.graph_db.query(query, params)
             if result and result[0]["id"]:
                 entity_id = result[0]["id"]
-                # Rough check if it was newly created - needs refinement if exact count vital
-                # if result[0].get("created", False):
-                #     self.resolution_stats["new_entities"] += 1
-                # Simplification: Increment new_entities here, knowing it might slightly overcount if MERGE only matched
-                # A more accurate way requires checking properties before/after or using transaction events.
-                self.resolution_stats["new_entities"] += 1
+                self.resolution_stats["new_entities"] += 1 # Increment assuming creation intent
+                logger.debug(f"Created/Merged entity '{authoritative_name}' ({sanitized_type}) with ID {entity_id}, merge key {merge_property}='{merge_value}'.")
                 return entity_id
             else:
-                 logger.error(f"MERGE query for '{name}'/'{identifier_value}' ({sanitized_type}) failed to return ID.")
+                 logger.error(f"MERGE query for entity using merge key '{merge_property}'='{merge_value}' ({sanitized_type}) failed to return ID.")
                  self.resolution_stats["errors"] += 1
                  return None
         except Exception as e:
-            logger.error(f"Error creating/merging entity '{name}'/'{identifier_value}' ({sanitized_type}): {e}", exc_info=True)
+            if "already exists" in str(e) and merge_property == "name":
+                 logger.warning(f"Constraint violation merging {sanitized_type} on name='{merge_value}'. An entity might already exist with a different identifier. Error: {e}")
+            else:
+                 logger.error(f"Error creating/merging entity using merge key '{merge_property}'='{merge_value}' ({sanitized_type}): {e}", exc_info=True)
             self.resolution_stats["errors"] += 1
             return None
 
@@ -649,44 +642,114 @@ class EntityResolution:
             return None # Fail safe
 
     def merge_entity_properties(self, entity_id: str, new_properties: Dict[str, Any], source: str = None) -> None:
-        # (Implementation remains largely the same, ensure it gets entity_type correctly if needed for embedding regen)
-        if not new_properties: return
+        if not new_properties:
+            logger.debug(f"No new properties provided for merge into entity {entity_id}.")
+            return
         try:
              fetch_query = "MATCH (n) WHERE elementId(n) = $id RETURN n, labels(n)[0] as type"
              result = self.graph_db.query(fetch_query, {"id": entity_id})
-             if not result: return
+             if not result:
+                 logger.warning(f"Could not fetch entity {entity_id} for merging properties.")
+                 return
              current_node_data = result[0]['n']
-             entity_type = result[0]['type']
+             entity_type = result[0]['type'] # Get entity type for embedding regen
+             current_name = current_node_data.get("name", "") # Get current name
         except Exception as e:
-             logger.error(f"Failed to fetch entity {entity_id} for merging: {e}", exc_info=True); return
+             logger.error(f"Failed to fetch entity {entity_id} for merging: {e}", exc_info=True)
+             return
 
         set_clauses = []
         merge_params = {"id": entity_id, "source": source}
+        # Start with existing properties for embedding calculation later
         combined_properties = dict(current_node_data)
+        properties_updated = False # Flag to track if any property actually changed
+        name_changed = False # Flag to track if the 'name' property specifically changed
 
         for key, value in new_properties.items():
             prop_key_sanitized = self.sanitize_label(key).lower()
-            if not prop_key_sanitized or prop_key_sanitized in ['id', 'embedding', 'name', 'sources']: continue
-            combined_properties[prop_key_sanitized] = value
-            set_clauses.append(f"n.`{prop_key_sanitized}` = $param_{prop_key_sanitized}")
-            merge_params[f"param_{prop_key_sanitized}"] = value
 
-        if source: set_clauses.append("n.sources = CASE WHEN $source IN coalesce(n.sources, []) THEN n.sources ELSE coalesce(n.sources, []) + $source END")
+            # --- CORRECTED EXCLUSION LIST ---
+            # Exclude only non-updatable keys or keys handled specially (like sources/embedding)
+            if not prop_key_sanitized or prop_key_sanitized in ['id', 'embedding', 'sources', 'normalized_name']:
+                 continue
+            # --- END CORRECTION ---
 
-        if self.vector_enabled:
-            new_embedding = self._generate_embedding_for_entity(current_node_data.get("name", ""), entity_type, combined_properties)
+            # Get the current value, handle potential missing keys
+            current_value = current_node_data.get(prop_key_sanitized)
+
+            # Prepare the new value (handle NaN, convert non-basics to string)
+            new_value_processed = None
+            if isinstance(value, (int, float, bool, str)):
+                new_value_processed = value
+            elif pd.isna(value):
+                new_value_processed = None # Use Neo4j null
+            else:
+                try:
+                    new_value_processed = str(value)
+                except Exception:
+                    logger.warning(f"Could not convert value for property '{prop_key_sanitized}' to string for entity {entity_id}. Skipping property.")
+                    continue # Skip this property if conversion fails
+
+            # Only add SET clause if value is new or different (or if explicitly setting to null)
+            # This avoids unnecessary updates and embedding regeneration
+            if new_value_processed != current_value:
+                logger.debug(f"Updating property '{prop_key_sanitized}' for node {entity_id} from '{current_value}' to '{new_value_processed}'")
+                properties_updated = True
+                set_clauses.append(f"n.`{prop_key_sanitized}` = $param_{prop_key_sanitized}")
+                merge_params[f"param_{prop_key_sanitized}"] = new_value_processed
+                combined_properties[prop_key_sanitized] = new_value_processed # Update for embedding
+
+                # Track if the 'name' property specifically changed
+                if prop_key_sanitized == 'name':
+                    name_changed = True
+                    current_name = new_value_processed # Update current_name variable immediately
+
+        # Handle source list update (always attempt if source provided)
+        if source:
+            # Check if source is already present to avoid redundant SET clause if possible
+            current_sources = current_node_data.get('sources', [])
+            if source not in current_sources:
+                set_clauses.append("n.sources = CASE WHEN $source IN coalesce(n.sources, []) THEN n.sources ELSE coalesce(n.sources, []) + $source END")
+                properties_updated = True # Indicate change even if only source added
+                logger.debug(f"Adding source '{source}' to node {entity_id}")
+            else:
+                logger.debug(f"Source '{source}' already present for node {entity_id}. Skipping source update.")
+
+
+        # --- Update Normalized Name if Name Changed ---
+        if name_changed:
+            new_normalized_name = self._normalize_name(current_name) # Use the updated current_name
+            if new_normalized_name and new_normalized_name != current_node_data.get("normalized_name"):
+                 logger.debug(f"Updating normalized_name for node {entity_id} to '{new_normalized_name}'")
+                 set_clauses.append("n.normalized_name = $normalized_name")
+                 merge_params["normalized_name"] = new_normalized_name
+                 properties_updated = True
+                 combined_properties["normalized_name"] = new_normalized_name # Update for embedding
+        # --- End Normalized Name Update ---
+
+        # Regenerate embedding only if vector support is enabled AND properties actually changed
+        if self.vector_enabled and properties_updated:
+            logger.debug(f"Regenerating embedding for updated node {entity_id} ('{current_name}')")
+            # Use the potentially updated name and combined properties
+            new_embedding = self._generate_embedding_for_entity(current_name, entity_type, combined_properties)
             if new_embedding:
                 set_clauses.append("n.embedding = $embedding")
                 merge_params["embedding"] = new_embedding
 
+        # Execute the update only if there are actual changes
         if set_clauses:
             try:
+                # Ensure entity_id is correctly passed
+                # merge_params['id'] = entity_id # Already set at the beginning
                 merge_query = f"MATCH (n) WHERE elementId(n) = $id SET {', '.join(set_clauses)}"
                 self.graph_db.query(merge_query, merge_params)
                 self.resolution_stats["merged_entities"] += 1
+                logger.info(f"Successfully merged properties into entity {entity_id} from source {source}.")
             except Exception as e:
                 logger.error(f"Error merging properties for entity {entity_id}: {e}", exc_info=True)
                 self.resolution_stats["errors"] += 1
+        else:
+            logger.debug(f"No property changes detected for entity {entity_id} from source {source}. Merge skipped.")
 
     def get_stats(self) -> Dict[str, int]:
         # (Implementation remains the same)

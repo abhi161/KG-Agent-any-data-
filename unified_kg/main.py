@@ -6,12 +6,8 @@ from typing import List, Dict, Any
 import time
 from dotenv import load_dotenv
 
-# Assuming your project structure places config and core correctly
 from unified_kg.config import Config
 from unified_kg.core.kg_builder import LLMEnhancedKnowledgeGraph
-
-# LangChain imports needed by components might be implicitly handled
-# but let's add the key ones used directly here for clarity
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain_neo4j import Neo4jGraph
 
@@ -21,6 +17,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
                           initial_schema_path: str = None, config_path: str = None) -> Dict[str, Any]:
@@ -36,20 +33,17 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
     Returns:
         Dictionary with processing statistics
     """
+
     # Load environment variables
     load_dotenv()
 
     # Load configuration
-    config_obj = Config() # Renamed to avoid conflict with argparse 'config'
+    config_obj = Config()
     if config_path and os.path.exists(config_path):
         logger.info(f"Loading configuration from: {config_path}")
         with open(config_path, 'r') as f:
             config_data = json.load(f)
-            config_obj.update_from_dict(config_data) # Use update method if exists
-            # Alternatively, manually update:
-            # for key, value in config_data.items():
-            #     if hasattr(config_obj, key):
-            #         setattr(config_obj, key, value)
+            config_obj.update_from_dict(config_data)
     else:
          logger.info("Using default configuration from environment variables.")
 
@@ -101,27 +95,29 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
         vector_enabled_for_builder = False
     else:
         logger.info(f"Neo4j vector support detected. Using {vector_support.get('details', 'Native Indexing or GDS')} for vector operations.")
-        vector_enabled_for_builder = True # Use Neo4j capabilities if available
+        vector_enabled_for_builder = True
 
-    # Override with config setting if explicitly disabled
     if not config_obj.vector_enabled:
          logger.warning("Vector embeddings explicitly disabled in application configuration.")
          vector_enabled_for_builder = False
-         embeddings = None # Ensure embeddings are not used if disabled globally
+         embeddings = None 
+
+
+
 
     # Initialize knowledge graph builder
     kg_builder = LLMEnhancedKnowledgeGraph(
         llm,
         graph,
-        embeddings,  # Pass potentially None embeddings
+        embeddings,  
         schema_path =initial_schema_path,
         initial_schema=initial_schema,
         config={
             "batch_size": config_obj.batch_size,
             "chunk_size": config_obj.chunk_size,
             "chunk_overlap": config_obj.chunk_overlap,
-            "vector_enabled": vector_enabled_for_builder, # Use the determined status
-            "vector_similarity_threshold": config_obj.vector_similarity_threshold # Pass threshold
+            "vector_enabled": vector_enabled_for_builder, 
+            "vector_similarity_threshold": config_obj.vector_similarity_threshold 
         }
         
     )
@@ -182,6 +178,9 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
         logger.error(f"Critical error during knowledge graph building: {e}", exc_info=True)
         return {"error": str(e)}
 
+
+
+
 def check_neo4j_vector_capabilities(graph: Neo4jGraph) -> Dict[str, Any]:
     """
     Check if Neo4j has vector capabilities enabled (Vector Index or GDS)
@@ -199,17 +198,15 @@ def check_neo4j_vector_capabilities(graph: Neo4jGraph) -> Dict[str, Any]:
         "capabilities": {
             "vector_indexes": False,
             "gds": False,
-            "apoc": False # Check APOC as well, useful for other things
+            "apoc": False 
         }
     }
     try:
-        # Check for Vector Index capabilities (introduced in 5.x)
         try:
             vector_query = "CALL db.indexes() YIELD name, type WHERE type = 'VECTOR' RETURN count(*) > 0 as has_vector_indexes"
             vector_result = graph.query(vector_query)
             capabilities["capabilities"]["vector_indexes"] = vector_result[0]["has_vector_indexes"] if vector_result else False
         except Exception as e:
-            # This query might fail on older Neo4j versions or if permissions are insufficient
             logger.debug(f"Could not check for vector indexes (may be expected): {e}")
             capabilities["capabilities"]["vector_indexes"] = False
 
@@ -222,7 +219,7 @@ def check_neo4j_vector_capabilities(graph: Neo4jGraph) -> Dict[str, Any]:
             logger.debug(f"Could not check for GDS plugin (may be expected): {e}")
             capabilities["capabilities"]["gds"] = False
 
-         # Check for APOC plugin (useful for fuzzy matching etc.)
+         # Check for APOC plugin 
         try:
             apoc_query = "CALL apoc.help('text') YIELD name RETURN count(*) > 0 as has_apoc"
             apoc_result = graph.query(apoc_query)
@@ -238,8 +235,6 @@ def check_neo4j_vector_capabilities(graph: Neo4jGraph) -> Dict[str, Any]:
             capabilities["details"] = "Neo4j Vector Index"
             capabilities["reason"] = "Native vector index support found."
         elif capabilities["capabilities"]["gds"]:
-             # GDS can handle vectors but might require different setup/queries
-             # For simplicity here, we'll consider it support, but native index is preferred
             capabilities["has_vector_support"] = True
             capabilities["details"] = "Graph Data Science (GDS) library"
             capabilities["reason"] = "GDS library found, which can support vector operations."

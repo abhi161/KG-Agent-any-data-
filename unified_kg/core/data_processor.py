@@ -1,30 +1,29 @@
-# --- core/data_processor.py (MODIFIED) ---
+# --- core/data_processor.py ---
 import os
 import re
 import logging
 import json
 import pandas as pd
-from datetime import datetime # <-- ADDED IMPORT
+from datetime import datetime 
 from typing import List, Dict, Any, Tuple, Optional
 
-# LangChain imports (ensure these are correct based on your langchain version)
-try:
-    from langchain_community.document_loaders import PyPDFLoader, CSVLoader, TextLoader
-except ImportError:
-    from langchain.document_loaders import PyPDFLoader, CSVLoader, TextLoader # Fallback
 
+from langchain_community.document_loaders import PyPDFLoader, CSVLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser, OutputFixingParser
 from pydantic import BaseModel, Field, field_validator
 from langchain.chains import LLMChain
-from langchain.llms.base import BaseLLM # Using base class for type hint
-from langchain.embeddings.base import Embeddings # Using base class for type hint
+from langchain.llms.base import BaseLLM 
+from langchain.embeddings.base import Embeddings 
 from .schema_manager import SchemaManager
+
+
 logger = logging.getLogger(__name__)
 
-# --- Pydantic Models (Unchanged) ---
+
+
 class Entity(BaseModel):
     name: str = Field(description="The specific name of the entity mentioned in the text")
     type: str = Field(description="A concise entity type (e.g., Person, Organization, Location, Drug, Disease, Chemical Compound, Medical Device)")
@@ -49,11 +48,15 @@ class Relation(BaseModel):
             raise ValueError("Source, relation, and target must not be empty")
         return v.strip()
 
+
+
 class EntitiesOutput(BaseModel):
     entities: List[Entity] = Field(description="List of entities extracted from the text")
 
 class RelationsOutput(BaseModel):
     relations: List[Relation] = Field(description="List of relationships extracted from the text")
+
+
 
 class ColumnMapping(BaseModel):
      column_name: str = Field(description="The original name of the CSV column.")
@@ -63,7 +66,8 @@ class ColumnMappingsOutput(BaseModel):
     column_mappings: List[ColumnMapping] = Field(description="Mapping of relevant column names to their primary entity types or 'Attribute'.")
 
 
-# --- DataProcessor Class ---
+
+
 class DataProcessor:
     """ Processor for structured (CSV) and unstructured (PDF/Text) data. """
 
@@ -81,8 +85,7 @@ class DataProcessor:
             add_start_index=True,
         )
 
-        # --- LLM Chains Initialization (Unchanged from previous correct version) ---
-        # Entity Extraction Chain
+        # Entity Extraction Chain----------------------------------------------------------------------
         entity_parser = PydanticOutputParser(pydantic_object=EntitiesOutput)
         entity_prompt = PromptTemplate(
             template="""Extract key entities from the text below. For each entity, provide its name and any key attributes mentioned.
@@ -97,25 +100,27 @@ class DataProcessor:
             {text}
 
             {format_instructions}""",
-            input_variables=["text", "schema_definition"], # Added schema_definition
+            input_variables=["text", "schema_definition"], 
             partial_variables={"format_instructions": entity_parser.get_format_instructions()}
         )
         self.entity_chain = LLMChain(llm=llm, prompt=entity_prompt)
         self.entity_parser = entity_parser
         self.entity_fixing_parser = OutputFixingParser.from_llm(parser=entity_parser, llm=llm)
 
-        # Relation Extraction Chain
+
+
+        # Relation Extraction Chain----------------------------------------------------------------------------------
         relation_parser = PydanticOutputParser(pydantic_object=RelationsOutput)
         relation_prompt = PromptTemplate(
             template="""Identify relationships between the entities listed below, based *only* on the provided text context. Relationships should be directional (source -> relation -> target). Use clear, concise relationship types (e.g., TREATS, CAUSES, INTERACTS_WITH, MANUFACTURED_BY, IS_A, PART_OF). Provide the source entity name, relation type, target entity name, and the sentence showing the relationship.
 
-Text Context:
-{text}
+            Text Context:
+            {text}
 
-Entities Found (Name - Type):
-{entities_list_str}
+            Entities Found (Name - Type):
+            {entities_list_str}
 
-{format_instructions}""",
+            {format_instructions}""",
             input_variables=["text", "entities_list_str"],
             partial_variables={"format_instructions": relation_parser.get_format_instructions()}
         )
@@ -123,23 +128,41 @@ Entities Found (Name - Type):
         self.relation_parser = relation_parser
         self.relation_fixing_parser = OutputFixingParser.from_llm(parser=relation_parser, llm=llm)
 
-        # Column Type Inference Chain
+
+
+
+        # Column Type Inference Chain-------------------------------------------------------------------------------
         column_parser = PydanticOutputParser(pydantic_object=ColumnMappingsOutput)
         column_prompt = PromptTemplate(
-            template="""Analyze the following CSV column names and sample data.
-            For each column, determine if it primarily represents instances of an **existing entity type** from the schema provided below.
-            If it matches an existing type (e.g., a column of patient IDs matches 'Patient'), use that exact type name.
-            If the column represents a simple attribute, measurement, date, or identifier that doesn't map to an existing entity type, classify it as 'Attribute'.
-            Only propose a completely new entity type if absolutely necessary and no existing type fits.
+            template="""
+            Task: Infer Entity Type Mappings for CSV Columns
 
-            Available Schema Entity Types:
+            Analyze the provided CSV column names and sample data. Your goal is to map **relevant columns** to their **primary entity type** based on the provided Knowledge Graph Schema Definition.
+
+            **Knowledge Graph Schema Definition:**
             {schema_definition}
 
-            Column names: {column_names}
+            **Instructions:**
+
+            1.  **Identify Identifier Columns:** Pay **critical attention** to columns whose names **exactly match** an `identifier_property` defined in the schema (e.g., `patient_id`, `doctor_id`, `med_id`, `prescription_id`, or `name` if the type is Hospital, Manufacturer, Disease, etc.). These columns are **strong indicators** of the entity type. Map these columns to their corresponding entity type from the schema.
+            2.  **Identify Other Entity Columns:** Map other columns that clearly represent instances of an entity type defined in the schema (even if not the identifier column) to that entity type. Use the exact type name from the schema.
+            3.  **Use 'Attribute' Sparingly:** If a column represents a simple property, measurement, date, description, flag, or characteristic that **does not** correspond to a distinct entity type defined in the schema, classify it as 'Attribute'. **Do NOT** classify identifier columns (like `patient_id`) as 'Attribute'.
+            4.  **Avoid New Types:** Do NOT propose new entity types unless absolutely necessary and the concept is clearly distinct from all existing schema types. Prefer mapping to existing types or 'Attribute'.
+            5.  **Focus on Primary Meaning:** Consider the primary meaning of the column based on its name and data.
+            6.  **Output Format:** Provide the mapping only for columns identified as representing an entity type (not 'Attribute'). Use the specified JSON format.
+
+            **CSV Data:**
+
+            Column names:
+            {column_names}
+
             Sample data (first 5 rows):
             {sample_data}
 
-            {format_instructions}""",
+            **Required Output:**
+
+            {format_instructions}
+            """,
             input_variables=["column_names", "sample_data", "schema_definition"], # Added schema_definition
             partial_variables={"format_instructions": column_parser.get_format_instructions()}
         )
@@ -150,23 +173,24 @@ Entities Found (Name - Type):
         self.document_metadata: Dict[int, Dict] = {}
         logger.info("DataProcessor initialized.")
 
-    # --- Helper function to sanitize values for JSON ---
+
+
+    # Helper function to sanitize values for JSON 
     def _sanitize_value_for_json(self, value: Any) -> Any:
         """Sanitizes individual values for safe JSON serialization."""
+
         if isinstance(value, (datetime, pd.Timestamp)):
             try:
                 return value.isoformat()
             except Exception:
-                return str(value) # Fallback to string if isoformat fails
-        elif pd.isna(value): # Handle pandas NA specifically
-             return None # Represent as JSON null
+                return str(value) 
+        elif pd.isna(value): 
+             return None 
         elif isinstance(value, (int, float, bool, str)):
-            # Truncate long strings
             if isinstance(value, str) and len(value) > 200:
                 return value[:197] + '...'
             return value
         else:
-            # Attempt to convert other types to string, handle errors
             try:
                 s = str(value)
                 if len(s) > 200:
@@ -176,16 +200,14 @@ Entities Found (Name - Type):
                 return "<Unserializable Data>"
 
 
-    # --- CSV Processing (process_csv unchanged) ---
+    # --- CSV Processing ---
     def process_csv(self, file_path: str) -> Tuple[pd.DataFrame, Dict[str, Any]]:
-        # (Implementation remains the same as previous correct version)
+      
         logger.info(f"Processing CSV file: {file_path}")
         try:
-            df = pd.read_csv(file_path, keep_default_na=True, low_memory=False)
+            df = pd.read_csv(file_path, low_memory=False)
             df.columns = df.columns.str.strip()
             df = df.dropna(how='all')
-            # Keep NA for processing, sanitize during JSON prep
-            # df = df.fillna('') # Delay fillna
 
             logger.info(f"Loaded CSV '{os.path.basename(file_path)}': {len(df)} rows, {len(df.columns)} columns.")
             metadata = {
@@ -196,16 +218,18 @@ Entities Found (Name - Type):
             column_mappings = self._infer_column_types(df)
             metadata["column_mappings"] = column_mappings
             logger.info(f"Inferred column mappings: {column_mappings}")
-            # Now fill NA after inference if needed downstream
+            
             df = df.fillna('')
             return df, metadata
+        
         except FileNotFoundError: logger.error(f"CSV file not found: {file_path}"); raise
         except pd.errors.EmptyDataError:
              logger.warning(f"CSV file is empty: {file_path}")
              return pd.DataFrame(columns=[]), {"file_path": file_path, "file_name": os.path.basename(file_path), "row_count": 0, "column_count": 0, "columns": [], "column_mappings": {}}
         except Exception as e: logger.error(f"Error processing CSV file {file_path}: {e}", exc_info=True); raise
 
-    # --- MODIFIED _infer_column_types ---
+
+
     def _infer_column_types(self, df: pd.DataFrame) -> Dict[str, str]:
         """ Use LLM to infer entity types from column names and data. """
         if df.empty:
@@ -216,37 +240,33 @@ Entities Found (Name - Type):
 
         try:
             sample_data_raw = df.head(5).to_dict('records')
-            # Sanitize the sample data using the helper method
+            
             sanitized_sample_data = [
                 {k: self._sanitize_value_for_json(v) for k, v in row.items()}
                 for row in sample_data_raw
             ]
-            # Use standard list of dictionaries format for JSON
+           
             sample_data_str = json.dumps(sanitized_sample_data, indent=2)
-            logger.debug(f"Sample data for LLM inference:\n{sample_data_str}") # Debug log
+            logger.debug(f"Sample data for LLM inference:\n{sample_data_str}") 
 
         except Exception as json_err:
-             # Log the specific error during sanitization/dumping
              logger.warning(f"Could not serialize sample data for LLM inference: {json_err}. Proceeding with column names only.", exc_info=True)
-             # Keep sample_data_str as default "[Sample data unavailable]"
 
         current_schema_prompt_str = self.schema_manager.get_current_schema_definition(format_for_prompt=True)
 
-        # Limit prompt size if necessary (same logic as before)
         max_prompt_chars = 8000
         input_text = f"Columns: {column_names}, Sample: {sample_data_str}"
         if len(input_text) > max_prompt_chars:
              estimated_col_len = len(json.dumps(column_names)) + 30
              allowed_sample_len = max_prompt_chars - estimated_col_len
-             sample_data_str = sample_data_str[:allowed_sample_len] + "...]" # Truncate JSON string
+             sample_data_str = sample_data_str[:allowed_sample_len] + "...]" 
              logger.warning("Sample data string truncated for LLM column type inference due to length limits.")
 
-        # --- LLM call and parsing logic (remains the same) ---
         try:
             raw_response = self.column_chain.invoke({
                  "column_names": json.dumps(column_names),
                  "sample_data": sample_data_str,
-                 "schema_definition": current_schema_prompt_str # <-- PASS SCHEMA
+                 "schema_definition": current_schema_prompt_str 
             })
             llm_output_text = raw_response.get('text', '')
             if not llm_output_text:

@@ -8,34 +8,38 @@ logger = logging.getLogger(__name__)
 class SchemaManager:
     """
     Manages the knowledge graph schema, including discovery and persistence.
-    (This is a basic placeholder - needs full implementation)
     """
+
+
     def __init__(self, llm, graph_db, initial_schema: Optional[Dict] = None, schema_file_path: Optional[str] = None):
-        self.llm = llm # May be needed for schema refinement/validation
+
+        self.llm = llm 
         self.graph_db = graph_db
-        # self.schema = initial_schema or {"entity_types": [], "relation_types": []}
+        self.schema = initial_schema or {"entity_types": [], "relation_types": []}
         self.pending_changes = {"entity_types": {}, "relation_types": {}} # Store discovered types temporarily
         self.schema_file_path = schema_file_path
-        self.schema = self._load_schema(initial_schema)
+        # self.schema = self._load_schema(initial_schema)
 
         # Store known types for quick lookup (use sanitized names)
+
         self._known_entity_types = {self._sanitize(et['name']) for et in self.schema.get('entity_types', []) if 'name' in et}
         self._known_relation_types = {self._sanitize(rt['name']) for rt in self.schema.get('relation_types', []) if 'name' in rt}
+
         logger.info(f"SchemaManager initialized with {len(self._known_entity_types)} entity types and {len(self._known_relation_types)} relation types.")
 
-    def _load_schema(self, initial_schema_obj: Optional[Dict]) -> Dict:
-        """Loads schema from file if path provided, else uses initial object."""
-        if self.schema_file_path and os.path.exists(self.schema_file_path):
-            try:
-                with open(self.schema_file_path, 'r') as f:
-                    logger.info(f"Loading schema from file: {self.schema_file_path}")
-                    return json.load(f)
-            except (IOError, json.JSONDecodeError) as e:
-                logger.error(f"Error loading schema file {self.schema_file_path}, using initial object/default. Error: {e}")
-                return initial_schema_obj or {"entity_types": [], "relation_types": []}
-        else:
-            logger.info("No schema file path provided or file not found, using initial schema object.")
-            return initial_schema_obj or {"entity_types": [], "relation_types": []}
+    # def _load_schema(self, initial_schema_obj: Optional[Dict]) -> Dict:
+    #     """Loads schema from file if path provided, else uses initial object."""
+    #     if self.schema_file_path and os.path.exists(self.schema_file_path):
+    #         try:
+    #             with open(self.schema_file_path, 'r') as f:
+    #                 logger.info(f"Loading schema from file: {self.schema_file_path}")
+    #                 return json.load(f)
+    #         except (IOError, json.JSONDecodeError) as e:
+    #             logger.error(f"Error loading schema file {self.schema_file_path}, using initial object/default. Error: {e}")
+    #             return initial_schema_obj or {"entity_types": [], "relation_types": []}
+    #     else:
+    #         logger.info("No schema file path provided or file not found, using initial schema object.")
+    #         return initial_schema_obj or {"entity_types": [], "relation_types": []}
 
     def _save_schema(self):
         """Saves the current schema back to the file if path is defined."""
@@ -55,21 +59,22 @@ class SchemaManager:
             logger.error(f"Error saving schema file {self.schema_file_path}: {e}")
 
     def _generate_description(self, item_name: str, item_category: str = "entity type") -> str:
+
         """Uses LLM to generate a brief description (optional)."""
-        if not self.llm: return f"A type of {item_category}." # Default if no LLM
+
+        if not self.llm: return f"A type of {item_category}."
         try:
              prompt = f"Provide a concise, one-sentence description for the following knowledge graph {item_category}: '{item_name}'. Focus on its typical role or definition in a general or medical context.\nDescription:"
              description = self.llm.invoke(prompt).content.strip()
-             # Basic cleanup
+             
              if description.endswith('.'): description = description[:-1]
-             return description[:150] # Limit length
+             return description[:150] 
         except Exception as e:
              logger.warning(f"Failed to generate description for {item_name}: {e}")
              return f"Represents a {item_name}." # Fallback
 
     def get_current_schema_definition(self, format_for_prompt=True) -> Any:
          """Returns the current schema, potentially formatted for an LLM prompt."""
-         # Ensure the schema object is up-to-date (maybe reload if needed, though updates modify in memory)
          current_schema = self.schema
 
          if format_for_prompt:
@@ -77,43 +82,34 @@ class SchemaManager:
               schema_str = "Available Entity Types:\n"
               for et in current_schema.get("entity_types", []):
                    schema_str += f"- {et.get('name')}: {et.get('description', 'No description')}\n"
-              # Optionally add relation types if helpful for the specific prompt
+              # if required add relation types if helpful for the specific prompt
               # schema_str += "\nAvailable Relation Types:\n"
               # for rt in current_schema.get("relation_types", []):
               #     schema_str += f"- {rt.get('name')}\n"
               return schema_str
          else:
-              # Return the raw dictionary object
               return current_schema
 
 
     def _sanitize(self, name: str) -> str:
-        """ Consistent sanitization for internal use. """
+
         if not isinstance(name, str): return "Unknown"
         sanitized = ''.join(c if c.isalnum() else '_' for c in name)
+
         if not sanitized or not sanitized[0].isalpha(): sanitized = "Type_" + sanitized
         sanitized = '_'.join(filter(None, sanitized.split('_')))
-        return sanitized.upper() if ' ' not in name else sanitized # Uppercase for relations likely
+
+        return sanitized.upper() if ' ' not in name else sanitized 
+
+
 
     def initialize_schema(self):
         """ Apply initial schema constraints or indexes in Neo4j. """
         logger.info("Applying schema constraints/indexes (basic implementation)...")
-        # Example: Create constraints for unique IDs if defined in schema
-        # for entity_type in self.schema.get("entity_types", []):
-        #     type_name = self._sanitize(entity_type.get("name"))
-        #     # Assuming an 'id' property for uniqueness - adjust as needed
-        #     id_prop = "id" # Or "unique_hash" or configured primary key
-        #     if type_name and "id" in entity_type.get("properties",[]):
-        #         try:
-        #             # Use specific ID property name if available
-        #             query = f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:`{type_name}`) REQUIRE n.{id_prop} IS UNIQUE"
-        #             self.graph_db.query(query)
-        #             logger.debug(f"Applied unique constraint on {type_name}({id_prop})")
-        #         except Exception as e:
-        #              # Constraint might already exist, or other issues
-        #              logger.warning(f"Could not apply constraint on {type_name}({id_prop}): {e}")
+
         logger.info("Schema initialization step complete.")
-        # Actual implementation would involve creating indexes on properties etc.
+        pass
+      
 
     def has_entity_type(self, entity_type: str) -> bool:
         """ Check if an entity type is known (case-insensitive check on sanitized name). """
@@ -125,19 +121,22 @@ class SchemaManager:
 
 
     def discover_entity_type(self, entity_type: str, confidence: float, source: str):
+
         """ Register a newly discovered entity type. """
         sanitized_type = self._sanitize(entity_type)
         if sanitized_type not in self._known_entity_types and sanitized_type not in self.pending_changes["entity_types"]:
             logger.info(f"Schema Discovery: New entity type '{entity_type}' (Sanitized: {sanitized_type}) found from {source} with confidence {confidence:.2f}")
-            # Generate description
+            
             description = self._generate_description(entity_type, "entity type")
             self.pending_changes["entity_types"][sanitized_type] = {
                 "original_name": entity_type,
-                "description": description, # Store description
-                "confidence": confidence,
+                "description": description, 
+                "confidence": confidence, 
                 "sources": [source]
             }
+            
         elif sanitized_type in self.pending_changes["entity_types"]:
+             
              # Update confidence/sources if found again before approval
              self.pending_changes["entity_types"][sanitized_type]["confidence"] = max(confidence, self.pending_changes["entity_types"][sanitized_type]["confidence"])
              if source not in self.pending_changes["entity_types"][sanitized_type]["sources"]:
@@ -163,7 +162,7 @@ class SchemaManager:
                   self.pending_changes["relation_types"][sanitized_type]["sources"].append(source)
 
 
-    def process_pending_changes(self, approval_threshold=0.85):
+    def process_pending_changes(self, approval_threshold=0.75):
         """ Process discovered types, add approved ones to schema, and save. """
         logger.info(f"Processing {len(self.pending_changes['entity_types'])} pending entity types and {len(self.pending_changes['relation_types'])} pending relation types...")
         schema_updated = False

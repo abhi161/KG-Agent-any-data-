@@ -50,7 +50,9 @@ class Config:
         # Initialize services
         self.llm = None
         self.embeddings = None
-        
+        self.initial_schema_path = os.getenv("INITIAL_SCHEMA_PATH", "schema.json")
+        print(f"Using schema path: {self.initial_schema_path}")
+
     def _validate_config(self):
         """Validate the configuration parameters"""
         missing = []
