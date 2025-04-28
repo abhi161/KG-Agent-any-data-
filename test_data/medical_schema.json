@@ -132,16 +132,7 @@
         "Hospital"
       ]
     },
-    {
-      "name": "TREATS",
-      "description": "Indicates which patient a doctor treats",
-      "source_types": [
-        "Doctor"
-      ],
-      "target_types": [
-        "Patient"
-      ]
-    },
+    
     {
       "name": "SAME_AS",
       "description": "Indicates that two entities refer to the same real-world entity",

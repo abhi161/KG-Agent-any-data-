@@ -660,25 +660,28 @@ class EntityResolution:
 
         set_clauses = []
         merge_params = {"id": entity_id, "source": source}
-        # Start with existing properties for embedding calculation later
         combined_properties = dict(current_node_data)
-        properties_updated = False # Flag to track if any property actually changed
-        name_changed = False # Flag to track if the 'name' property specifically changed
+        properties_updated = False
+        name_changed = False
+        new_name_candidate = None # Store the name from new_properties if present
 
         for key, value in new_properties.items():
             prop_key_sanitized = self.sanitize_label(key).lower()
 
-            # --- CORRECTED EXCLUSION LIST ---
-            # Exclude only non-updatable keys or keys handled specially (like sources/embedding)
+            # --- Skip internal/special keys ---
             if not prop_key_sanitized or prop_key_sanitized in ['id', 'embedding', 'sources', 'normalized_name']:
-                 continue
-            # --- END CORRECTION ---
+                continue
 
-            # Get the current value, handle potential missing keys
+            # --- Store the incoming name candidate ---
+            if prop_key_sanitized == 'name':
+                if pd.notna(value) and str(value).strip(): # Check if incoming name is valid
+                    new_name_candidate = str(value)
+                    continue # Handle name update logic separately below
+
+            # --- Handle other properties ---
             current_value = current_node_data.get(prop_key_sanitized)
-
-            # Prepare the new value (handle NaN, convert non-basics to string)
             new_value_processed = None
+            # ... (value processing logic remains the same - handle NaN, int, float, bool, str conversion) ...
             if isinstance(value, (int, float, bool, str)):
                 new_value_processed = value
             elif pd.isna(value):
@@ -688,10 +691,9 @@ class EntityResolution:
                     new_value_processed = str(value)
                 except Exception:
                     logger.warning(f"Could not convert value for property '{prop_key_sanitized}' to string for entity {entity_id}. Skipping property.")
-                    continue # Skip this property if conversion fails
+                    continue
 
-            # Only add SET clause if value is new or different (or if explicitly setting to null)
-            # This avoids unnecessary updates and embedding regeneration
+            # Only add SET clause if value is new or different, or explicitly setting to null
             if new_value_processed != current_value:
                 logger.debug(f"Updating property '{prop_key_sanitized}' for node {entity_id} from '{current_value}' to '{new_value_processed}'")
                 properties_updated = True
@@ -699,52 +701,73 @@ class EntityResolution:
                 merge_params[f"param_{prop_key_sanitized}"] = new_value_processed
                 combined_properties[prop_key_sanitized] = new_value_processed # Update for embedding
 
-                # Track if the 'name' property specifically changed
-                if prop_key_sanitized == 'name':
-                    name_changed = True
-                    current_name = new_value_processed # Update current_name variable immediately
+        # --- Smart Name Update Logic ---
+        if new_name_candidate and new_name_candidate != current_name:
+            # Condition: Only update name if the new name doesn't look like the primary ID
+            # (This prevents overwriting "John Smith" with "P001")
+            # Get the primary ID property and value for comparison
+            identifier_property = self.get_identifier_property(entity_type)
+            identifier_value_str = str(current_node_data.get(identifier_property)) if identifier_property else None
 
-        # Handle source list update (always attempt if source provided)
+            # Update name if:
+            # 1. Current name is missing/empty OR
+            # 2. New name looks substantially different from the ID (heuristic) OR
+            # 3. New name is longer than current name (might be more descriptive)
+            should_update_name = False
+            if not current_name:
+                should_update_name = True
+                logger.debug(f"Setting name for node {entity_id} to '{new_name_candidate}' because current name is missing.")
+            elif identifier_value_str and new_name_candidate.lower() != identifier_value_str.lower():
+                # Only update if new name isn't just the ID string itself
+                should_update_name = True
+                logger.debug(f"Updating name for node {entity_id} from '{current_name}' to '{new_name_candidate}'.")
+            # Optional: Add length check? -> elif len(new_name_candidate) > len(current_name): should_update_name = True
+
+            if should_update_name:
+                properties_updated = True
+                name_changed = True
+                current_name = new_name_candidate # Update current_name variable
+                set_clauses.append("n.name = $name_param")
+                merge_params["name_param"] = current_name
+                combined_properties["name"] = current_name # Update for embedding
+
+        # --- Handle source list update (always attempt if source provided) ---
+        # ... (source list update logic remains the same) ...
         if source:
-            # Check if source is already present to avoid redundant SET clause if possible
             current_sources = current_node_data.get('sources', [])
             if source not in current_sources:
                 set_clauses.append("n.sources = CASE WHEN $source IN coalesce(n.sources, []) THEN n.sources ELSE coalesce(n.sources, []) + $source END")
-                properties_updated = True # Indicate change even if only source added
+                properties_updated = True
                 logger.debug(f"Adding source '{source}' to node {entity_id}")
             else:
                 logger.debug(f"Source '{source}' already present for node {entity_id}. Skipping source update.")
 
-
         # --- Update Normalized Name if Name Changed ---
         if name_changed:
-            new_normalized_name = self._normalize_name(current_name) # Use the updated current_name
+            new_normalized_name = self._normalize_name(current_name)
             if new_normalized_name and new_normalized_name != current_node_data.get("normalized_name"):
-                 logger.debug(f"Updating normalized_name for node {entity_id} to '{new_normalized_name}'")
-                 set_clauses.append("n.normalized_name = $normalized_name")
-                 merge_params["normalized_name"] = new_normalized_name
-                 properties_updated = True
-                 combined_properties["normalized_name"] = new_normalized_name # Update for embedding
-        # --- End Normalized Name Update ---
+                logger.debug(f"Updating normalized_name for node {entity_id} to '{new_normalized_name}'")
+                set_clauses.append("n.normalized_name = $normalized_name")
+                merge_params["normalized_name"] = new_normalized_name
+                properties_updated = True
+                combined_properties["normalized_name"] = new_normalized_name
 
-        # Regenerate embedding only if vector support is enabled AND properties actually changed
+        # Regenerate embedding only if necessary
         if self.vector_enabled and properties_updated:
+            # ... (embedding regeneration logic remains the same, using updated current_name and combined_properties) ...
             logger.debug(f"Regenerating embedding for updated node {entity_id} ('{current_name}')")
-            # Use the potentially updated name and combined properties
             new_embedding = self._generate_embedding_for_entity(current_name, entity_type, combined_properties)
             if new_embedding:
                 set_clauses.append("n.embedding = $embedding")
                 merge_params["embedding"] = new_embedding
 
-        # Execute the update only if there are actual changes
+        # Execute update only if changes were detected
         if set_clauses:
             try:
-                # Ensure entity_id is correctly passed
-                # merge_params['id'] = entity_id # Already set at the beginning
                 merge_query = f"MATCH (n) WHERE elementId(n) = $id SET {', '.join(set_clauses)}"
                 self.graph_db.query(merge_query, merge_params)
-                self.resolution_stats["merged_entities"] += 1
-                logger.info(f"Successfully merged properties into entity {entity_id} from source {source}.")
+                self.resolution_stats["merged_entities"] += 1 # Count actual merges
+                logger.info(f"Successfully merged properties into entity {entity_id} ('{current_name}') from source {source}.")
             except Exception as e:
                 logger.error(f"Error merging properties for entity {entity_id}: {e}", exc_info=True)
                 self.resolution_stats["errors"] += 1
