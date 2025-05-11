@@ -1,10 +1,10 @@
 {
-  "start_time": "2025-04-24T13:56:37.605387",
+  "start_time": "2025-05-11T18:26:20.303481",
   "csv_files_processed": 4,
-  "pdf_files_processed": 2,
-  "entities_created": 42,
-  "entities_merged": 47,
-  "relationships_created": 8,
+  "pdf_files_processed": 1,
+  "entities_created": 40,
+  "entities_merged": 44,
+  "relationships_created": 0,
   "csv": {
     "rows_processed": 21,
     "relationships_created": 33,
@@ -12,32 +12,32 @@
     "related_entities_processed": 33
   },
   "pdf": {
-    "chunks_processed": 2,
-    "entities_extracted": 22,
+    "chunks_processed": 1,
+    "entities_extracted": 8,
     "relationships_extracted": 0,
-    "relationships_created": 8
+    "relationships_created": 2
   },
   "cross_ref": {
-    "name_based_rels_created": 8,
+    "name_based_rels_created": 0,
     "vector_based_rels_created": 0
   },
-  "end_time": "2025-04-24T13:58:24.556900",
+  "end_time": "2025-05-11T18:27:10.562171",
   "entity_resolution": {
-    "total_calls": 76,
+    "total_calls": 73,
     "id_matches": 20,
-    "exact_matches": 9,
-    "fuzzy_matches": 3,
+    "exact_matches": 10,
+    "fuzzy_matches": 1,
     "vector_matches": 0,
-    "llm_resolved": 0,
-    "new_entities": 42,
-    "merged_entities": 47,
+    "llm_resolved": 12,
+    "new_entities": 40,
+    "merged_entities": 44,
     "errors": 0,
-    "normalized_name_matches": 2
+    "normalized_name_matches": 1
   },
   "pending_schema_changes": {
     "pending_entity_types": 0,
-    "pending_relation_types": 4
+    "pending_relation_types": 1
   },
-  "total_relationships_created": 49,
-  "processing_time_seconds": 110.8
+  "total_relationships_created": 35,
+  "processing_time_seconds": 54.27
 }

@@ -1,4 +1,4 @@
-med_id,brand_name,generic_name,classification,manufacturer
+med_id,brand_name,name,classification,manufacturer
 M001,Tenormin,Atenolol,Beta Blocker,AstraZeneca
 M002,Advil,Ibuprofen,NSAID,Pfizer
 M003,Glucophage,Metformin,Antidiabetic,Merck

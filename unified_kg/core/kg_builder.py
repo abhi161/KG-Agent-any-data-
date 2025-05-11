@@ -470,14 +470,22 @@ class LLMEnhancedKnowledgeGraph:
         # Note: MERGE matches based on the relationship *type* and *direction*.
         # Adding properties to MERGE makes it specific to those properties too.
         # For simplicity, we MERGE only on type/direction and update properties.
+        # query = f"""
+        # MATCH (a), (b)
+        # WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+        # MERGE (a)-[r:`{sanitized_rel_type}`]->(b)
+        # ON CREATE SET r.created_at = timestamp(), r.sources = [$source]
+        # ON MATCH SET r.sources = CASE WHEN $source IN coalesce(r.sources, []) THEN r.sources ELSE coalesce(r.sources, []) + $source END,
+        #            r.last_seen = timestamp()
+        # // Add custom properties using SET, applicable on both CREATE and MATCH
+        # """
         query = f"""
-        MATCH (a), (b)
-        WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+        MATCH (a) WHERE elementId(a) = $source_id
+        MATCH (b) WHERE elementId(b) = $target_id
         MERGE (a)-[r:`{sanitized_rel_type}`]->(b)
         ON CREATE SET r.created_at = timestamp(), r.sources = [$source]
         ON MATCH SET r.sources = CASE WHEN $source IN coalesce(r.sources, []) THEN r.sources ELSE coalesce(r.sources, []) + $source END,
-                   r.last_seen = timestamp()
-        // Add custom properties using SET, applicable on both CREATE and MATCH
+                r.last_seen = timestamp()
         """
         params = {
             "source_id": source_id,
@@ -549,7 +557,7 @@ class LLMEnhancedKnowledgeGraph:
                     properties["source"] = file_basename # Base source
                     properties["chunk_index"] = chunk_idx
                     if "context" in entity_data and entity_data["context"]:
-                        properties["context"] = entity_data["context"][:500] # Limit context length
+                        properties["context"] = entity_data["context"][:800] # Limit context length
 
                     # Add other metadata if available (e.g., page number from splitter)
                     chunk_meta = self.data_processor.document_metadata.get(chunk_idx, {})
@@ -608,7 +616,7 @@ class LLMEnhancedKnowledgeGraph:
 
                              rel_props = {"chunk_index": chunk_idx}
                              if "context" in relation_data and relation_data["context"]:
-                                  rel_props["context"] = relation_data["context"][:500]
+                                  rel_props["context"] = relation_data["context"][:800]
 
                              self._create_relationship(
                                  source_graph_entity["id"],
@@ -954,6 +962,8 @@ class LLMEnhancedKnowledgeGraph:
         - Name: {bridge.get('bridge_name', 'N/A')}
         - Type: {bridge.get('bridge_type', 'N/A')}
         - ID: {bridge.get('bridge_id', 'N/A')}
+
+        **Important Consideration:** Entity 1 has ID {entity1.get('id')} and Entity 2 has ID {entity2.get('id')}. If these entities were originally defined with distinct primary keys in their source files (e.g., different doctor_ids), be very cautious about suggesting a strong direct relationship unless the context strongly supports it. A generic 'RELATED_TO' might be acceptable if they are linked through the bridge context but otherwise distinct.
 
         Based on these entities and their types, is there a likely direct relationship between Entity 1 and Entity 2?
         If YES, suggest a concise, descriptive relationship type in UPPER_SNAKE_CASE representing how Entity 1 relates to Entity 2 (e.g., MANUFACTURES, INTERACTS_WITH, IS_VARIANT_OF, CITES, RELATED_TO).

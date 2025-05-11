@@ -88,22 +88,38 @@ class DataProcessor:
         # Entity Extraction Chain----------------------------------------------------------------------
         entity_parser = PydanticOutputParser(pydantic_object=EntitiesOutput)
         entity_prompt = PromptTemplate(
-            template="""Extract key entities from the text below. For each entity, provide its name and any key attributes mentioned.
-            **Crucially, map the entity to the MOST specific existing entity type from the schema provided below.**
-            If no existing type accurately represents the entity, you may propose a concise, new type.
-            Also provide the sentence where the entity appears as context.
+            template="""
+        Task: Extract Key Entities and Concepts from Text
 
-            Available Schema Entity Types:
-            {schema_definition}
+        From the text provided below, identify and extract important entities and key conceptual noun phrases.
+        For each item extracted:
+        1.  Provide its `name` as it appears in the text or a concise representation.
+        2.  Determine its `type`. Prioritize mapping to an existing entity type from the "Available Schema Entity Types" if a clear and specific match exists.
+        3.  If the item is a significant concept, plan, process, system, event, or abstract noun phrase that is central to the text but doesn't fit a specific schema type, classify it with a generic type like "Concept", "Activity", "Process", "System", or "Event". Use the most appropriate generic type.
+        4.  Only if no existing specific or suitable generic type fits, and the item is clearly a distinct real-world category, may you propose a concise, new, specific entity type.
+        5.  List any directly mentioned `attributes` or key properties of the entity/concept.
+        6.  Provide the `context`: the sentence or short phrase where it was mentioned.
 
-            Text:
-            {text}
+        **Available Schema Entity Types:**
+        {schema_definition}
+        (If this list is empty or not comprehensive, rely more on generic types or propose new specific types where appropriate for distinct real-world categories.)
 
-            {format_instructions}""",
-            input_variables=["text", "schema_definition"], 
+        **Focus on:**
+        - Named entities (Persons, Organizations, Locations, Products, etc.).
+        - Key terminologies, technical terms, or domain-specific jargon.
+        - Important noun phrases that represent systems, plans, methods, protocols, problems, solutions, theories, or results being discussed.
+        - Events or significant occurrences mentioned.
+
+        **Text:**
+        {text}
+
+        **Required Output Format:**
+        {format_instructions}
+        """,
+            input_variables=["text", "schema_definition"],
             partial_variables={"format_instructions": entity_parser.get_format_instructions()}
         )
-        self.entity_chain = LLMChain(llm=llm, prompt=entity_prompt)
+        self.entity_chain = LLMChain(llm=llm, prompt=entity_prompt) # Or new RunnableSequence
         self.entity_parser = entity_parser
         self.entity_fixing_parser = OutputFixingParser.from_llm(parser=entity_parser, llm=llm)
 
@@ -292,9 +308,9 @@ class DataProcessor:
             return {}
 
 
-    # --- PDF Processing (process_pdf unchanged) ---
+    # --- PDF Processing ---
     def process_pdf(self, file_path: str) -> Tuple[List[str], Dict[str, Any]]:
-        # (Implementation remains the same as previous correct version)
+     
         logger.info(f"Processing PDF file: {file_path}")
         try:
             loader = PyPDFLoader(file_path, extract_images=False)
@@ -321,9 +337,9 @@ class DataProcessor:
         except FileNotFoundError: logger.error(f"PDF file not found: {file_path}"); raise
         except Exception as e: logger.error(f"Error processing PDF file {file_path}: {e}", exc_info=True); raise
 
-    # --- Entity Extraction (extract_entities_from_text unchanged) ---
+    # --- Entity Extraction ---
     def extract_entities_from_text(self, text: str) -> List[Dict[str, Any]]:
-        # (Implementation remains the same as previous correct version)
+
         if not text or not text.strip(): return []
         max_len = 12000
         truncated_text = text[:max_len]
@@ -339,7 +355,7 @@ class DataProcessor:
             except Exception as parse_error:
                  logger.warning(f"Failed parse entities: {parse_error}. Fixing...")
                  parsed_result = self.entity_fixing_parser.parse(llm_output_text)
-            entities_list = [entity.dict() for entity in parsed_result.entities]
+            entities_list = [entity.model_dump() for entity in parsed_result.entities]
             logger.debug(f"Extracted {len(entities_list)} entities.")
             return entities_list
         except Exception as e: logger.error(f"LLM chain failed entity extraction: {e}", exc_info=True); return []

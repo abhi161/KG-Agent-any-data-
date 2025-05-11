@@ -64,7 +64,7 @@ class SchemaManager:
 
         if not self.llm: return f"A type of {item_category}."
         try:
-             prompt = f"Provide a concise, one-sentence description for the following knowledge graph {item_category}: '{item_name}'. Focus on its typical role or definition in a general or medical context.\nDescription:"
+             prompt = f"Provide a concise, one-sentence description for the following knowledge graph {item_category}: '{item_name}'. Focus on its typical role or definition in a general.\nDescription:"
              description = self.llm.invoke(prompt).content.strip()
              
              if description.endswith('.'): description = description[:-1]

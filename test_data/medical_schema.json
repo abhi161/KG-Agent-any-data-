@@ -30,7 +30,7 @@
       "properties": [
         "med_id",
         "brand_name",
-        "generic_name",
+        "name",
         "classification",
         "manufacturer"
       ],
@@ -78,6 +78,31 @@
     {
       "name": "Patient_Case_Study",
       "description": "A Patient Case Study is a detailed report that documents the diagnosis, treatment, and outcomes of an individual patient's medical condition, often us",
+      "properties": []
+    },
+    {
+      "name": "Concept",
+      "description": "A 'Concept' is an abstract idea or a mental symbol that typically represents a class or category of objects, events, or phenomena, encapsulating share",
+      "properties": []
+    },
+    {
+      "name": "Process",
+      "description": "A 'Process' is a series of actions or steps taken in order to achieve a particular end",
+      "properties": []
+    },
+    {
+      "name": "System",
+      "description": "A 'System' typically refers to a set of interconnected components or elements that work together in a structured manner to achieve a specific function",
+      "properties": []
+    },
+    {
+      "name": "Document",
+      "description": "A 'Document' is a written, drawn, presented, or memorialized representation of thought, often serving as official evidence or record",
+      "properties": []
+    },
+    {
+      "name": "Date",
+      "description": "'Date' typically refers to a specific day in a calendar, often used to mark or schedule events, appointments, or significant occurrences",
       "properties": []
     }
   ],
@@ -132,7 +157,16 @@
         "Hospital"
       ]
     },
-    
+    {
+      "name": "TREATS",
+      "description": "Indicates which patient a doctor treats",
+      "source_types": [
+        "Doctor"
+      ],
+      "target_types": [
+        "Patient"
+      ]
+    },
     {
       "name": "SAME_AS",
       "description": "Indicates that two entities refer to the same real-world entity",

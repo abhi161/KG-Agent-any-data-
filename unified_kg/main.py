@@ -151,13 +151,13 @@ def build_knowledge_graph(csv_files: List[str], pdf_files: List[str],
             else:
                 logger.warning(f"PDF file not found, skipping: {pdf_file}")
 
-        # Cross-reference data sources
-        if csv_results and pdf_results:
-             logger.info("Starting cross-referencing between CSV and PDF data sources.")
-             cross_ref_results = kg_builder.cross_reference_data_sources()
-             logger.info(f"Finished cross-referencing data sources: {cross_ref_results}")
-        else:
-             logger.info("Skipping cross-referencing as only one type of data source was processed.")
+        # # Cross-reference data sources
+        # if csv_results and pdf_results:
+        #      logger.info("Starting cross-referencing between CSV and PDF data sources.")
+        #      cross_ref_results = kg_builder.cross_reference_data_sources()
+        #      logger.info(f"Finished cross-referencing data sources: {cross_ref_results}")
+        # else:
+        #      logger.info("Skipping cross-referencing as only one type of data source was processed.")
 
         # Process schema changes (if SchemaManager is implemented and used)
         # Assuming SchemaManager might be part of kg_builder
